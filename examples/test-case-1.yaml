@@ -1,0 +1,12 @@
+name: test-case-1
+defaultRetries: 10
+defaultTimeout: 10s
+operations:
+  - action: create
+    template: template-1
+    templateValues:
+      namespace: xyz
+      name: xyz
+    expected:
+      fail: true
+      error: re("^")
