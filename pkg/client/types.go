@@ -13,7 +13,7 @@ const DEFAULT_NAMESPACE = "default"
 
 type Client interface {
 	Apply(ctx context.Context, obj *unstructured.Unstructured) error
-	Get(ctx context.Context, apiVersion, kind, namespace string) (*unstructured.UnstructuredList, error)
+	Get(ctx context.Context, apiVersion, kind, namespace, labelSelector string) (*unstructured.UnstructuredList, error)
 	Delete(ctx context.Context, obj *unstructured.Unstructured) error
 	Exec(ctx context.Context, name string, namespace string, cmd []string) (string, error)
 }

@@ -25,7 +25,7 @@ func (ctrl *KubeController) Run() (*Report, error) {
 		Results:  []*TestResult{},
 	}
 
-	testfiles, err := ctrl.Loader.GetTestCases()
+	testfiles, err := ctrl.Loader.ListTestCases()
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (ctrl *KubeController) Run() (*Report, error) {
 			var err error
 			var msg string
 
-			if ops.Action == CREATE_OPERATION {
-				msg, err = ctrl.create(ops)
+			if ops.Action == APPLY_OPERATION {
+				msg, err = ctrl.apply(ops)
 			} else if ops.Action == GET_OPERATION {
 				msg, err = ctrl.get(ops)
 			} else if ops.Action == DELETE_OPERATION {
@@ -81,22 +81,4 @@ func (ctrl *KubeController) Run() (*Report, error) {
 	}
 
 	return report, nil
-}
-
-func (ctrl *KubeController) create(ops *loader.TestOperation) (string, error) {
-	fmt.Println("create", ops)
-	return "", nil
-}
-
-func (ctrl *KubeController) delete(ops *loader.TestOperation) (string, error) {
-	fmt.Println("delete", ops)
-	return "", nil
-}
-func (ctrl *KubeController) get(ops *loader.TestOperation) (string, error) {
-	fmt.Println("get", ops)
-	return "", nil
-}
-func (ctrl *KubeController) exec(ops *loader.TestOperation) (string, error) {
-	fmt.Println("exec", ops)
-	return "", nil
 }

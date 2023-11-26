@@ -15,7 +15,7 @@ func NewLoader(testsFolder, templatesFolder string) Loader {
 	}
 }
 
-func (ldr *FSloader) GetTestCases() ([]string, error) {
+func (ldr *FSloader) ListTestCases() ([]string, error) {
 	files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", ldr.TestsFolder))
 	if err != nil {
 		return nil, err
@@ -23,6 +23,8 @@ func (ldr *FSloader) GetTestCases() ([]string, error) {
 
 	return files, nil
 }
+
+// TODO join the following 2 functions with generics
 
 func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 
@@ -41,6 +43,19 @@ func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 	return testcase, nil
 }
 
-func (ldr *FSloader) LoadTemplate(tname string) (*TestTemplate, error) {
-	return nil, nil
+func (ldr *FSloader) LoadTemplate(fname string) (*TestTemplate, error) {
+
+	var testTempl *TestTemplate
+
+	data, err := os.ReadFile(fname)
+	if err != nil {
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(data, &testTempl)
+	if err != nil {
+		return nil, err
+	}
+
+	return testTempl, nil
 }

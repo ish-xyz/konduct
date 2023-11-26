@@ -97,7 +97,7 @@ func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) 
 }
 
 // Kubernetes Get/List operation with dynamic client for custom and core types.
-func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace string) (*unstructured.UnstructuredList, error) {
+func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, labelSelector string) (*unstructured.UnstructuredList, error) {
 
 	var dr dynamic.ResourceInterface
 
@@ -127,7 +127,9 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace string
 		dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
 	}
 
-	retrievedObjects, err := dr.List(ctx, metav1.ListOptions{})
+	retrievedObjects, err := dr.List(ctx, metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
 	if err != nil {
 		return nil, err
 	}

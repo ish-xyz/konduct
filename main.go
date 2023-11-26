@@ -15,7 +15,7 @@ func main() {
 	dynclient, _ := dynamic.NewForConfig(restConfig)
 	clientset, _ := kubernetes.NewForConfig(restConfig)
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
-	ldr := loader.NewLoader("filesystem", "./examples")
+	ldr := loader.NewLoader("./examples", "./examples/templates")
 	ctrl := controller.NewController(ldr, kubeclient)
 	ctrl.Run()
 }

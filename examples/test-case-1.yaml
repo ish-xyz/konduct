@@ -2,31 +2,32 @@ name: test-case-1
 defaultRetries: 10
 defaultTimeout: 10s
 operations:
+  # - action: apply
+  #   template: template-1
+  #   templateValues:
+  #     namespace: xyz
+  #     name: xyz
+  #   expected:
+  #     fail: true
+  #     output: re("^")
 
-  - action: create
-    template: template-1
-    templateValues:
-      namespace: xyz
-      name: xyz
+  - action: get
+    apiVersion: v1
+    kind: Pod
+    namespace: "default"
+    name: "po"
+    labelSelector: ""
     expected:
-      fail: true
-      output: re("^")
-
-  - action: read
-    resource: core/v1/pods
-    name: "mypod"
-    labelSelector: "k8s-app=cilium"
-    expected:
-      items: 3
+      count: 3
       payload:
         name: xyz
         status.something: regex(this
 
-  - action: exec
-    name: pod
-    namespace: default
-    command: ["ls"]
-    expected:
-      fail: false
-      output: "this"
+  # - action: exec
+  #   name: pod
+  #   namespace: default
+  #   command: ["ls"]
+  #   expected:
+  #     fail: false
+  #     output: "this"
 

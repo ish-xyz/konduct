@@ -6,13 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	CREATE_OPERATION = "create"
-	DELETE_OPERATION = "delete"
-	EXEC_OPERATION   = "exec"
-	GET_OPERATION    = "get"
-)
-
 type Controller interface {
 	Run() (*Report, error)
 }
