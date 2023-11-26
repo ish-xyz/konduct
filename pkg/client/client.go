@@ -58,7 +58,8 @@ func getNamespace(obj *unstructured.Unstructured, mapping *meta.RESTMapping) str
 	return namespace
 }
 
-func (k *KubeClient) ServerSideApply(ctx context.Context, obj *unstructured.Unstructured) error {
+// Implementation of Kubernetes server side apply
+func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) error {
 
 	var dr dynamic.ResourceInterface
 
@@ -95,38 +96,8 @@ func (k *KubeClient) ServerSideApply(ctx context.Context, obj *unstructured.Unst
 
 }
 
-func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured) error {
-
-	var dr dynamic.ResourceInterface
-
-	mapper, err := getRESTMapper(k.Config)
-	if err != nil {
-		return err
-	}
-
-	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
-	if err != nil {
-		return err
-	}
-
-	namespace := getNamespace(obj, mapping)
-
-	dr = k.DynClient.Resource(mapping.Resource)
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
-	}
-
-	// Exec rest request to API
-	deletePolicy := metav1.DeletePropagationForeground
-	deleteOptions := metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	}
-	err = dr.Delete(ctx, obj.GetName(), deleteOptions)
-
-	return err
-}
-
-func (k *KubeClient) Read(ctx context.Context, apiVersion, kind, namespace string) (*unstructured.UnstructuredList, error) {
+// Kubernetes Get/List operation with dynamic client for custom and core types.
+func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace string) (*unstructured.UnstructuredList, error) {
 
 	var dr dynamic.ResourceInterface
 
@@ -171,6 +142,39 @@ func (k *KubeClient) Read(ctx context.Context, apiVersion, kind, namespace strin
 	return retrievedObjects, nil
 }
 
+// Kubernetes delete operation with dynamic client
+func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured) error {
+
+	var dr dynamic.ResourceInterface
+
+	mapper, err := getRESTMapper(k.Config)
+	if err != nil {
+		return err
+	}
+
+	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
+	if err != nil {
+		return err
+	}
+
+	namespace := getNamespace(obj, mapping)
+
+	dr = k.DynClient.Resource(mapping.Resource)
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
+	}
+
+	// Exec rest request to API
+	deletePolicy := metav1.DeletePropagationForeground
+	deleteOptions := metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}
+	err = dr.Delete(ctx, obj.GetName(), deleteOptions)
+
+	return err
+}
+
+// Pod exec method to run commands and fetch outputs (stdout/stderr)
 func (k *KubeClient) Exec(ctx context.Context, name string, namespace string, cmd []string) (string, error) {
 
 	var stdoutBuff bytes.Buffer

@@ -1,17 +1,13 @@
 package loader
 
-import (
-	"github.com/sirupsen/logrus"
-)
-
 type FSloader struct {
 	Source string
-	logger *logrus.Entry
 }
 
 type Loader interface {
-	Load(files []string) ([]*TestCase, error)
-	GetCases() ([]string, error)
+	GetTestCases() ([]string, error)
+	LoadTestCase(fname string) (*TestCase, error)
+	//LoadTemplate()
 }
 
 type TestCase struct {
@@ -23,8 +19,8 @@ type TestCase struct {
 
 type TestOperation struct {
 	Action         string            `yaml:"action"`
-	Template       string            `yaml:"template"`
-	TemplateValues map[string]string `yaml:"templateValues"`
+	Template       string            `yaml:"template,omitempty"`
+	TemplateValues map[string]string `yaml:"templateValues,omitempty"`
 }
 
 type ExpectedSpec struct {

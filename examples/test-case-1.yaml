@@ -2,6 +2,7 @@ name: test-case-1
 defaultRetries: 10
 defaultTimeout: 10s
 operations:
+
   - action: create
     template: template-1
     templateValues:
@@ -9,4 +10,23 @@ operations:
       name: xyz
     expected:
       fail: true
-      error: re("^")
+      output: re("^")
+
+  - action: read
+    resource: core/v1/pods
+    name: "mypod"
+    labelSelector: "k8s-app=cilium"
+    expected:
+      items: 3
+      payload:
+        name: xyz
+        status.something: this
+
+  - action: exec
+    name: pod
+    namespace: default
+    command: ["ls"]
+    expected:
+      fail: false
+      output: "this"
+
