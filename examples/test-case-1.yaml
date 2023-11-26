@@ -15,11 +15,11 @@ operations:
     apiVersion: v1
     kind: Pod
     namespace: "default"
-    name: "po"
+    name: pos
     labelSelector: ""
-    expected:
+    assert:
       count: 3
-      payload:
+      object:
         name: xyz
         status.something: regex(this
 

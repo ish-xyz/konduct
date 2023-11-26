@@ -35,10 +35,14 @@ type TestOperation struct {
 	Name          string `yaml:"name,omitempty"`
 	Namespace     string `yaml:"namespace,omitempty"`
 	LabelSelector string `yaml:"labelSelector,omitempty"`
+
+	// Global
+	Assert *Assert `yaml:"assert"`
 }
 
-type ExpectedSpec struct {
-	Fail  bool   `yaml:"fail"`
-	Error string `yaml:"error"`
-	Count int    `yaml:"count"`
+type Assert struct {
+	Fail   bool                   `yaml:"fail,omitempty"`
+	Error  string                 `yaml:"error,omitempty"`
+	Count  int                    `yaml:"count,omitempty"`
+	Object map[string]interface{} `yaml:"object,omitempty"`
 }

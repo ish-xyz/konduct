@@ -16,15 +16,17 @@ const (
 
 func (ctrl *KubeController) get(ops *loader.TestOperation) (string, error) {
 
-	data, _ := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.LabelSelector)
+	data, err := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
 
-	if ops.Name != "" {
-		for _, d := range data.Items {
-			if d.GetName() == ops.Name {
-				fmt.Println(d)
-			}
-		}
-	}
+	// TODO keep "not found" in consideration as non error if len is defined
+	// if err != nil {
+	// 	return "check failed", err
+	// }
+	fmt.Println(data, err)
+	fmt.Println(ops.Assert)
+	// for item := range data.Items {
+	// 	fmt.Println(item)
+	// }
 	return "", nil
 
 }

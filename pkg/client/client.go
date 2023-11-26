@@ -97,7 +97,7 @@ func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) 
 }
 
 // Kubernetes Get/List operation with dynamic client for custom and core types.
-func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, labelSelector string) (*unstructured.UnstructuredList, error) {
+func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name, labelSelector string) (*unstructured.UnstructuredList, error) {
 
 	var dr dynamic.ResourceInterface
 
@@ -127,21 +127,27 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, label
 		dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
 	}
 
-	retrievedObjects, err := dr.List(ctx, metav1.ListOptions{
-		LabelSelector: labelSelector,
-	})
-	if err != nil {
-		return nil, err
+	var outerr error
+	objects := &unstructured.UnstructuredList{
+		Items: []unstructured.Unstructured{},
 	}
-
-	// Return structured empty object instead of nil if there are no errors
-	if retrievedObjects == nil {
-		retrievedObjects = &unstructured.UnstructuredList{
-			Items: []unstructured.Unstructured{},
+	if name != "" {
+		item, err := dr.Get(ctx, name, metav1.GetOptions{})
+		outerr = err
+		if item != nil {
+			objects.Items = append(objects.Items, *item)
+		}
+	} else {
+		list, err := dr.List(ctx, metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		outerr = err
+		if list != nil {
+			objects = list
 		}
 	}
 
-	return retrievedObjects, nil
+	return objects, outerr
 }
 
 // Kubernetes delete operation with dynamic client
