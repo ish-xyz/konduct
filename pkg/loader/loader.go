@@ -8,14 +8,15 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-func NewLoader(ltype, src string) Loader {
+func NewLoader(testsFolder, templatesFolder string) Loader {
 	return &FSloader{
-		Source: src,
+		TestsFolder:     testsFolder,
+		TemplatesFolder: templatesFolder,
 	}
 }
 
 func (ldr *FSloader) GetTestCases() ([]string, error) {
-	files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", ldr.Source))
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", ldr.TestsFolder))
 	if err != nil {
 		return nil, err
 	}
@@ -38,4 +39,8 @@ func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 	}
 
 	return testcase, nil
+}
+
+func (ldr *FSloader) LoadTemplate(tname string) (*TestTemplate, error) {
+	return nil, nil
 }

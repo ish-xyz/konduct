@@ -1,13 +1,19 @@
 package loader
 
 type FSloader struct {
-	Source string
+	TestsFolder     string
+	TemplatesFolder string
 }
 
 type Loader interface {
 	GetTestCases() ([]string, error)
 	LoadTestCase(fname string) (*TestCase, error)
 	//LoadTemplate()
+}
+
+type TestTemplate struct {
+	Name string `yaml:"name"`
+	Data string `yaml:"data"`
 }
 
 type TestCase struct {
@@ -18,9 +24,9 @@ type TestCase struct {
 }
 
 type TestOperation struct {
-	Action         string            `yaml:"action"`
-	Template       string            `yaml:"template,omitempty"`
-	TemplateValues map[string]string `yaml:"templateValues,omitempty"`
+	Action         string                 `yaml:"action"`
+	Template       string                 `yaml:"template,omitempty"`
+	TemplateValues map[string]interface{} `yaml:"templateValues,omitempty"`
 }
 
 type ExpectedSpec struct {

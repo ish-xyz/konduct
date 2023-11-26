@@ -1,8 +1,13 @@
-name: test-case-1
-defaultRetries: 10
-defaultTimeout: 10s
-operations:
-
+apiVersion: kubetest.io/v1beta1
+kind: TestCase
+metadata:
+  name: test-case-1
+  labels:
+    app: testcase
+spec:
+  defaultRetries: 10
+  defaultTimeout: 10s
+  operations:
   - action: create
     template: template-1
     templateValues:
@@ -20,7 +25,7 @@ operations:
       items: 3
       payload:
         name: xyz
-        status.something: regex(this
+        status.something: this
 
   - action: exec
     name: pod
