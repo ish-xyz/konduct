@@ -14,9 +14,16 @@ const (
 	GET_OPERATION    = "get"
 )
 
-func (ctrl *KubeController) get(ops *loader.TestOperation) (string, error) {
+func (ctrl *KubeController) get(ops *loader.TestOperation) bool {
 
 	data, err := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
+
+	// // if not supposed to fail and err != nil return false
+	// if !ops.Assert.Fail && err != nil {
+	// 	return false
+	// }
+
+	fmt.Println(ops.Assert.Fail)
 
 	// TODO keep "not found" in consideration as non error if len is defined
 	// if err != nil {
@@ -27,7 +34,7 @@ func (ctrl *KubeController) get(ops *loader.TestOperation) (string, error) {
 	// for item := range data.Items {
 	// 	fmt.Println(item)
 	// }
-	return "", nil
+	return false
 
 }
 

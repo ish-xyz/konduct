@@ -3,6 +3,7 @@ module github.com/ish-xyz/ykubetest
 go 1.19
 
 require (
+	github.com/creasty/defaults v1.7.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/sirupsen/logrus v1.9.3
 	k8s.io/api v0.28.4

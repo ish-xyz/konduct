@@ -60,7 +60,7 @@ func (ctrl *KubeController) Run() (*Report, error) {
 			if ops.Action == APPLY_OPERATION {
 				msg, err = ctrl.apply(ops)
 			} else if ops.Action == GET_OPERATION {
-				msg, err = ctrl.get(ops)
+				_ = ctrl.get(ops)
 			} else if ops.Action == DELETE_OPERATION {
 				msg, err = ctrl.delete(ops)
 			} else if ops.Action == EXEC_OPERATION {

@@ -24,8 +24,8 @@ type TestCase struct {
 }
 
 type TestOperation struct {
+
 	// Apply & Delete
-	Action         string                 `yaml:"action"`
 	Template       string                 `yaml:"template,omitempty"`
 	TemplateValues map[string]interface{} `yaml:"templateValues,omitempty"`
 
@@ -38,11 +38,12 @@ type TestOperation struct {
 
 	// Global
 	Assert *Assert `yaml:"assert"`
+	Action string  `yaml:"action"`
 }
 
 type Assert struct {
 	Fail   bool                   `yaml:"fail,omitempty"`
-	Error  string                 `yaml:"error,omitempty"`
-	Count  int                    `yaml:"count,omitempty"`
+	Error  string                 `yaml:"error,omitempty" default:"{empty-error}"`
+	Count  int                    `yaml:"count,omitempty" default:"-1"`
 	Object map[string]interface{} `yaml:"object,omitempty"`
 }
