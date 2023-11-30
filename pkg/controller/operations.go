@@ -26,14 +26,13 @@ type Env struct {
 	Print func(format string, a ...any) string
 }
 
-func (ctrl *KubeController) get(ops *loader.TestOperation) bool {
+func runAssertions(code string, resp *client.Response) bool {
 
-	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
 	env := Env{
 		Input: resp,
 	}
 
-	for _, line := range strings.Split(ops.Assert, ";") {
+	for _, line := range strings.Split(code, ";") {
 		line = strings.TrimSpace(line)
 		fmt.Println(line)
 		if line == "" {
@@ -57,6 +56,12 @@ func (ctrl *KubeController) get(ops *loader.TestOperation) bool {
 	}
 
 	return true
+}
+
+func (ctrl *KubeController) get(ops *loader.TestOperation) bool {
+
+	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
+	return runAssertions(ops.Assert, resp)
 }
 
 func (ctrl *KubeController) apply(ops *loader.TestOperation) (string, error) {

@@ -1,6 +1,4 @@
 name: test-case-1
-defaultRetries: 10
-defaultTimeout: 10s
 operations:
 
   - action: apply
@@ -22,11 +20,13 @@ operations:
       Input.Error == nil;
       Input.Objects[0]["metadata"]["name"] == "po";
 
-  # - action: exec
-  #   name: pod
-  #   namespace: default
-  #   command: ["ls"]
-  #   expected:
-  #     fail: false
-  #     output: "this"
+  - action: exec
+    name: pod
+    namespace: default
+    command: ["any command"]
+    assert: |
+      Input.Error != nil;
+      Input.Error matches "^permission denied.*";
+      Input.Output == "";
+
 
