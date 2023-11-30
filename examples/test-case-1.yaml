@@ -19,6 +19,7 @@ operations:
       len(Input.Objects) == 1;
       Input.Objects[0]["metadata"]["name"] == "po";
       Input.Error == nil;
+      Input.Objects[0]["apiVersion"];
 
   - action: get
     apiVersion: v1

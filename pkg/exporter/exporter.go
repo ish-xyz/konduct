@@ -26,8 +26,8 @@ func (or *OperationResult) Set(expr [2]interface{}) {
 func (or *OperationResult) Str(everything bool) string {
 	msg := ""
 	for _, expr := range or.ExprResults {
-		if expr[1] == false {
-			msg = fmt.Sprintf("		%s\n%s -> %s", msg, expr[0], expr[1])
+		if expr[1] == false || everything {
+			msg = fmt.Sprintf("		%s\n%s -> %v", msg, expr[0], expr[1])
 		}
 	}
 	return msg
@@ -88,18 +88,17 @@ func (r *Report) Add(tr *TestResult) {
 	}
 }
 
-func (r *Report) Stdout() {
+func (r *Report) Stdout(everything bool) {
 	if r.Status {
-		fmt.Println("test succeded!")
+		fmt.Println("tests succeded!")
 	} else {
-		fmt.Println("test failed!")
+		fmt.Println("tests failed!")
 	}
-	fmt.Printf("succeded tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
-
+	fmt.Printf("completed tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
 	fmt.Println("errors:")
 	for _, res := range r.Results {
 
-		if !res.Status {
+		if !res.Status || everything {
 			fmt.Printf("%s\n", res.Message)
 		}
 	}
