@@ -2,23 +2,10 @@ package exporter
 
 import "fmt"
 
+// OperationResult functions
 type OperationResult struct {
 	Status      bool
 	ExprResults [][2]interface{}
-}
-
-type TestResult struct {
-	FilePath string
-	Name     string
-	Status   bool
-	Message  string
-}
-
-type Report struct {
-	Failed   int
-	Succeded int
-	Status   bool
-	Results  []*TestResult
 }
 
 func NewOperationResult() *OperationResult {
@@ -26,6 +13,32 @@ func NewOperationResult() *OperationResult {
 		Status:      true,
 		ExprResults: make([][2]interface{}, 0),
 	}
+}
+
+func (or *OperationResult) AddExpr(expr [2]interface{}) {
+	or.ExprResults = append(or.ExprResults, expr)
+}
+
+func (or *OperationResult) Set(expr [2]interface{}) {
+	or.ExprResults = append(or.ExprResults, expr)
+}
+
+func (or *OperationResult) Str(everything bool) string {
+	msg := ""
+	for _, expr := range or.ExprResults {
+		if expr[1] == false {
+			msg = fmt.Sprintf("		%s\n%s -> %s", msg, expr[0], expr[1])
+		}
+	}
+	return msg
+}
+
+// TestResult functions
+type TestResult struct {
+	FilePath string
+	Name     string
+	Status   bool
+	Message  string
 }
 
 func NewTestResult(tf string) *TestResult {
@@ -37,6 +50,21 @@ func NewTestResult(tf string) *TestResult {
 	}
 }
 
+func (tr *TestResult) Set(status bool, msg string) {
+	tr.Message = fmt.Sprintf("%s\n%s", tr.Message, msg)
+	if tr.Status && !status {
+		tr.Status = status
+	}
+}
+
+// Report functions
+type Report struct {
+	Failed   int
+	Succeded int
+	Status   bool
+	Results  []*TestResult
+}
+
 func NewReport() *Report {
 	return &Report{
 		Succeded: 0,
@@ -44,11 +72,6 @@ func NewReport() *Report {
 		Status:   true,
 		Results:  []*TestResult{},
 	}
-}
-
-func (tr *TestResult) Set(status bool, msg string) {
-	tr.Message = msg
-	tr.Status = status
 }
 
 func (r *Report) Add(tr *TestResult) {
@@ -65,16 +88,19 @@ func (r *Report) Add(tr *TestResult) {
 	}
 }
 
-func (or *OperationResult) AddExpr(expr [2]interface{}) {
-	or.ExprResults = append(or.ExprResults, expr)
-}
+func (r *Report) Stdout() {
+	if r.Status {
+		fmt.Println("test succeded!")
+	} else {
+		fmt.Println("test failed!")
+	}
+	fmt.Printf("succeded tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
 
-func (or *OperationResult) Str() string {
-	msg := "failed operations:"
-	for _, expr := range or.ExprResults {
-		if expr[1] != true {
-			msg = fmt.Sprintf("%s\n%s -> %s", msg, expr[0], expr[1])
+	fmt.Println("errors:")
+	for _, res := range r.Results {
+
+		if !res.Status {
+			fmt.Printf("%s\n", res.Message)
 		}
 	}
-	return msg
 }

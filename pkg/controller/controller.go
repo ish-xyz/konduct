@@ -52,14 +52,15 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 				opsres.Status = false
 				opsres.AddExpr(
 					[2]interface{}{
-						fmt.Sprint("invalid operation %s in testcase %s", ops.Action, testcase.Name),
+						fmt.Sprintf("invalid operation %s in testcase %s", ops.Action, testcase.Name),
 						false,
 					})
 			}
 
-			testResult.Set(opsres.Status, opsres.Str())
-			report.Add(testResult)
+			testResult.Set(opsres.Status, opsres.Str(false))
 		}
+
+		report.Add(testResult)
 	}
 
 	return report, nil

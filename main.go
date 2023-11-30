@@ -27,5 +27,13 @@ func main() {
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
 	ldr := loader.NewLoader("./examples", "./examples/templates")
 	ctrl := controller.NewController(ldr, kubeclient)
-	ctrl.Exec()
+	report, err := ctrl.Exec()
+
+	if err != nil {
+		panic(err)
+	}
+
+	report.Stdout()
+
+	return
 }

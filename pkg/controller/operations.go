@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/antonmedv/expr"
@@ -47,7 +48,7 @@ func runAssertions(code string, resp *client.Response) *exporter.OperationResult
 		// Compile expression
 		program, err := expr.Compile(line, expr.Env(env))
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{line, "failed: cannot compile expression"})
+			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s'", line), false})
 			opsResult.Status = false
 			break
 		}
@@ -55,7 +56,7 @@ func runAssertions(code string, resp *client.Response) *exporter.OperationResult
 		// Run expression
 		output, err := expr.Run(program, env)
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{line, "failed: cannot run expression"})
+			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot run expression: '%s'", line), false})
 			opsResult.Status = false
 			break
 		}

@@ -1,12 +1,23 @@
 name: test-case-1
 operations:
 
-  - action: apply
-    template: template-1
-    templateValues:
-      namespace: xyz
-      name: xyz
+  # - action: apply
+  #   template: template-1
+  #   templateValues:
+  #     namespace: xyz
+  #     name: xyz
+  #   assert: |
+  #     Input.Error == nil;
+
+  - action: get
+    apiVersion: v1
+    kind: Pod
+    namespace: default
+    name: po
+    labelSelector: ""
     assert: |
+      len(Input.Objects) == 1;
+      Input.Objects[0]["metadata"]["name"] == "po";
       Input.Error == nil;
 
   - action: get
@@ -17,18 +28,16 @@ operations:
     labelSelector: ""
     assert: |
       len(Input.Objects) == 1;
-      Input.Objects[0]["metadata"]["name"] == "Not-po";
+      Input.Objects[0]["metadata"]["name"] == "po";
       Input.Error == nil;
-      WRONG;
-      
 
-  - action: exec
-    name: pod
-    namespace: default
-    command: ["any command"]
-    assert: |
-      Input.Error != nil;
-      Input.Error matches "^permission denied.*";
-      Input.Output == "";
+  # - action: exec
+  #   name: pod
+  #   namespace: default
+  #   command: ["any command"]
+  #   assert: |
+  #     Input.Error != nil;
+  #     Input.Error matches "^permission denied.*";
+  #     Input.Output == "";
 
 
