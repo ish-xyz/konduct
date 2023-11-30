@@ -17,8 +17,10 @@ operations:
     labelSelector: ""
     assert: |
       len(Input.Objects) == 1;
+      Input.Objects[0]["metadata"]["name"] == "Not-po";
       Input.Error == nil;
-      Input.Objects[0]["metadata"]["name"] == "po";
+      WRONG;
+      
 
   - action: exec
     name: pod

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ish-xyz/ykubetest/pkg/client"
+	"github.com/ish-xyz/ykubetest/pkg/exporter"
 	"github.com/ish-xyz/ykubetest/pkg/loader"
 	"github.com/sirupsen/logrus"
 )
@@ -16,37 +17,26 @@ func NewController(ldr loader.Loader, cl client.Client) Controller {
 	}
 }
 
-func (ctrl *KubeController) Run() (*Report, error) {
+func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
-	report := &Report{
-		Succeded: 0,
-		Failed:   0,
-		Status:   true,
-		Results:  []*TestResult{},
-	}
+	report := exporter.NewReport()
 
 	testfiles, err := ctrl.Loader.ListTestCases()
 	if err != nil {
+		// TODO: report should be updated here
 		return nil, err
 	}
 
 	for _, tf := range testfiles {
-		testResult := &TestResult{
-			FilePath: tf,
-			Name:     "",
-			Status:   true,
-			Message:  "",
-		}
 
+		testResult := exporter.NewTestResult(tf)
 		testcase, err := ctrl.Loader.LoadTestCase(tf)
-		if err != nil {
-			testResult.Status = false
-			testResult.Message = fmt.Sprintf("failed to load testcase in %s", tf)
-			report.Failed += 1
-			report.Status = false
-			report.Results = append(report.Results, testResult)
 
+		if err != nil {
 			ctrl.logger.Errorf("failed to load test file %s", tf)
+
+			testResult.Set(false, fmt.Sprintf("failed to load testcase in %s", tf))
+			report.Add(testResult)
 			continue
 		}
 
@@ -54,29 +44,21 @@ func (ctrl *KubeController) Run() (*Report, error) {
 
 		for _, ops := range testcase.Operations {
 
-			var err error
-			var msg string
+			var opsres = exporter.NewOperationResult()
 
-			if ops.Action == APPLY_ACTION {
-				msg, err = ctrl.apply(ops)
-			} else if ops.Action == GET_ACTION {
-				fmt.Println(ctrl.get(ops))
-			} else if ops.Action == DELETE_ACTION {
-				msg, err = ctrl.delete(ops)
-			} else if ops.Action == EXEC_ACTION {
-				msg, err = ctrl.exec(ops)
+			if ops.Action == GET_ACTION {
+				opsres = ctrl.get(ops)
 			} else {
-				err = fmt.Errorf("invalid operation in testcase %s", testcase.Name)
+				opsres.Status = false
+				opsres.AddExpr(
+					[2]interface{}{
+						fmt.Sprint("invalid operation %s in testcase %s", ops.Action, testcase.Name),
+						false,
+					})
 			}
 
-			// report.TotalOperations += 1
-			if err != nil {
-				testResult.Status = false
-				report.Failed += 1
-				report.Status = false
-			}
-			testResult.Message = msg
-			report.Results = append(report.Results, testResult)
+			testResult.Set(opsres.Status, opsres.Str())
+			report.Add(testResult)
 		}
 	}
 

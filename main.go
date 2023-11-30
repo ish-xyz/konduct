@@ -27,5 +27,5 @@ func main() {
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
 	ldr := loader.NewLoader("./examples", "./examples/templates")
 	ctrl := controller.NewController(ldr, kubeclient)
-	ctrl.Run()
+	ctrl.Exec()
 }

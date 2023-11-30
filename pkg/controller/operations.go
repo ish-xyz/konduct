@@ -2,11 +2,11 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/ish-xyz/ykubetest/pkg/client"
+	"github.com/ish-xyz/ykubetest/pkg/exporter"
 	"github.com/ish-xyz/ykubetest/pkg/loader"
 )
 
@@ -26,54 +26,80 @@ type Env struct {
 	Print func(format string, a ...any) string
 }
 
-func runAssertions(code string, resp *client.Response) bool {
+func runAssertions(code string, resp *client.Response) *exporter.OperationResult {
+
+	opsResult := &exporter.OperationResult{
+		Status:      true,
+		ExprResults: make([][2]interface{}, 0),
+	}
 
 	env := Env{
 		Input: resp,
 	}
 
 	for _, line := range strings.Split(code, ";") {
+
 		line = strings.TrimSpace(line)
-		fmt.Println(line)
 		if line == "" {
 			continue
 		}
+
+		// Compile expression
 		program, err := expr.Compile(line, expr.Env(env))
 		if err != nil {
-			fmt.Println(err)
-			return false
+			opsResult.AddExpr([2]interface{}{line, "failed: cannot compile expression"})
+			opsResult.Status = false
+			break
 		}
 
+		// Run expression
 		output, err := expr.Run(program, env)
 		if err != nil {
-			fmt.Println(err)
-			return false
+			opsResult.AddExpr([2]interface{}{line, "failed: cannot run expression"})
+			opsResult.Status = false
+			break
 		}
 
-		if output == "false" {
-			return false
+		opsResult.AddExpr([2]interface{}{line, output})
+		if output == false {
+			opsResult.Status = false
+			break
 		}
 	}
 
-	return true
+	return opsResult
 }
 
-func (ctrl *KubeController) get(ops *loader.TestOperation) bool {
+func (ctrl *KubeController) get(ops *loader.TestOperation) *exporter.OperationResult {
 
 	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
-	return runAssertions(ops.Assert, resp)
+	data := runAssertions(ops.Assert, resp)
+
+	return data
 }
 
 func (ctrl *KubeController) apply(ops *loader.TestOperation) (string, error) {
-	fmt.Println("create", ops)
+	//TODO:
+	// render template
+	// run command and get response
+	// run assertions
+	// return operationResult
 	return "", nil
 }
 
 func (ctrl *KubeController) delete(ops *loader.TestOperation) (string, error) {
+	//TODO:
+	// render template
+	// run command and get response
+	// run assertions
+	// return operationResult
 	return "", nil
 }
 
 func (ctrl *KubeController) exec(ops *loader.TestOperation) (string, error) {
-	fmt.Println("exec", ops)
+	//TODO:
+	// run command and get response
+	// run assertions
+	// return operationResult
 	return "", nil
 }
