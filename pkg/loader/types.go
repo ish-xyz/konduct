@@ -37,13 +37,6 @@ type TestOperation struct {
 	LabelSelector string `yaml:"labelSelector,omitempty"`
 
 	// Global
-	Assert *Assert `yaml:"assert"`
-	Action string  `yaml:"action"`
-}
-
-type Assert struct {
-	Fail   bool                   `yaml:"fail,omitempty"`
-	Error  string                 `yaml:"error,omitempty" default:"{empty-error}"`
-	Count  int                    `yaml:"count,omitempty" default:"-1"`
-	Object map[string]interface{} `yaml:"object,omitempty"`
+	Assert string `yaml:"assert"`
+	Action string `yaml:"action"`
 }

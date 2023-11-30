@@ -5,8 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/creasty/defaults"
 	"github.com/ghodss/yaml"
+)
+
+const (
+	PLACE_HOLDER_EMPTY = "PLACE_HOLDER_EMPTY"
 )
 
 func NewLoader(testsFolder, templatesFolder string) Loader {
@@ -30,10 +33,6 @@ func (ldr *FSloader) ListTestCases() ([]string, error) {
 func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 
 	var testcase *TestCase
-
-	if err := defaults.Set(testcase); err != nil {
-		return nil, err
-	}
 
 	data, err := os.ReadFile(fname)
 	if err != nil {

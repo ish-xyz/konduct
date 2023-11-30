@@ -3,39 +3,60 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/antonmedv/expr"
+	"github.com/ish-xyz/ykubetest/pkg/client"
 	"github.com/ish-xyz/ykubetest/pkg/loader"
 )
 
 const (
-	APPLY_OPERATION  = "apply"
-	DELETE_OPERATION = "delete"
-	EXEC_OPERATION   = "exec"
-	GET_OPERATION    = "get"
+	// actions
+	APPLY_ACTION  = "apply"
+	DELETE_ACTION = "delete"
+	EXEC_ACTION   = "exec"
+	GET_ACTION    = "get"
+
+	// operators
+	REGEX_OPERATOR = "regex:"
 )
+
+type Env struct {
+	Input *client.Response
+	Print func(format string, a ...any) string
+}
 
 func (ctrl *KubeController) get(ops *loader.TestOperation) bool {
 
-	data, err := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
+	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
+	env := Env{
+		Input: resp,
+	}
 
-	// // if not supposed to fail and err != nil return false
-	// if !ops.Assert.Fail && err != nil {
-	// 	return false
-	// }
+	for _, line := range strings.Split(ops.Assert, ";") {
+		line = strings.TrimSpace(line)
+		fmt.Println(line)
+		if line == "" {
+			continue
+		}
+		program, err := expr.Compile(line, expr.Env(env))
+		if err != nil {
+			fmt.Println(err)
+			return false
+		}
 
-	fmt.Println(ops.Assert.Fail)
+		output, err := expr.Run(program, env)
+		if err != nil {
+			fmt.Println(err)
+			return false
+		}
 
-	// TODO keep "not found" in consideration as non error if len is defined
-	// if err != nil {
-	// 	return "check failed", err
-	// }
-	fmt.Println(data, err)
-	fmt.Println(ops.Assert)
-	// for item := range data.Items {
-	// 	fmt.Println(item)
-	// }
-	return false
+		if output == "false" {
+			return false
+		}
+	}
 
+	return true
 }
 
 func (ctrl *KubeController) apply(ops *loader.TestOperation) (string, error) {

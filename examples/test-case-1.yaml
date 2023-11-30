@@ -2,26 +2,25 @@ name: test-case-1
 defaultRetries: 10
 defaultTimeout: 10s
 operations:
-  # - action: apply
-  #   template: template-1
-  #   templateValues:
-  #     namespace: xyz
-  #     name: xyz
-  #   expected:
-  #     fail: true
-  #     output: re("^")
+
+  - action: apply
+    template: template-1
+    templateValues:
+      namespace: xyz
+      name: xyz
+    assert: |
+      Input.Error == nil;
 
   - action: get
     apiVersion: v1
     kind: Pod
-    namespace: "default"
-    name: pos
+    namespace: default
+    name: po
     labelSelector: ""
-    assert:
-      count: 3
-      object:
-        name: xyz
-        status.something: regex(this
+    assert: |
+      len(Input.Objects) == 1;
+      Input.Error == nil;
+      Input.Objects[0]["metadata"]["name"] == "po";
 
   # - action: exec
   #   name: pod

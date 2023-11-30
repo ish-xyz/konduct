@@ -29,3 +29,8 @@ type Report struct {
 	Status   bool
 	Results  []*TestResult
 }
+
+type Payload struct {
+	Message string
+	Status  int
+}

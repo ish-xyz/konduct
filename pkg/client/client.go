@@ -59,18 +59,25 @@ func getNamespace(obj *unstructured.Unstructured, mapping *meta.RESTMapping) str
 }
 
 // Implementation of Kubernetes server side apply
-func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) error {
+func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) *Response {
 
 	var dr dynamic.ResourceInterface
+	var resp = &Response{
+		Error:   nil,
+		Objects: nil,
+		Output:  "",
+	}
 
 	mapper, err := getRESTMapper(k.Config)
 	if err != nil {
-		return err
+		resp.Error = err
+		return resp
 	}
 
 	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
 	if err != nil {
-		return err
+		resp.Error = err
+		return resp
 	}
 
 	namespace := getNamespace(obj, mapping)
@@ -81,8 +88,12 @@ func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) 
 	}
 
 	// Check if namespace is empty and if resource is namespaced or not
-	data, _ := json.Marshal(obj)
-	_, err = dr.Patch(
+	data, err := json.Marshal(obj)
+	if err != nil {
+		resp.Error = err
+		return resp
+	}
+	_, resp.Error = dr.Patch(
 		ctx,
 		obj.GetName(),
 		types.ApplyPatchType,
@@ -92,14 +103,19 @@ func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) 
 		},
 	)
 
-	return err
+	return resp
 
 }
 
 // Kubernetes Get/List operation with dynamic client for custom and core types.
-func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name, labelSelector string) (*unstructured.UnstructuredList, error) {
+func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name, labelSelector string) *Response {
 
 	var dr dynamic.ResourceInterface
+	var resp = &Response{
+		Error:   nil,
+		Objects: nil,
+		Output:  "",
+	}
 
 	// Use empty group name if core v1
 	group := strings.Split(apiVersion, "/")[0]
@@ -109,12 +125,14 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 
 	mapper, err := getRESTMapper(k.Config)
 	if err != nil {
-		return nil, err
+		resp.Error = err
+		return resp
 	}
 
 	mapping, err := mapper.RESTMapping(schema.GroupKind{Kind: kind, Group: group})
 	if err != nil {
-		return nil, err
+		resp.Error = err
+		return resp
 	}
 
 	if mapping.Scope.Name() == meta.RESTScopeNameNamespace && namespace == "" {
@@ -128,14 +146,12 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 	}
 
 	var outerr error
-	objects := &unstructured.UnstructuredList{
-		Items: []unstructured.Unstructured{},
-	}
+	resp.Objects = []map[string]interface{}{}
 	if name != "" {
-		item, err := dr.Get(ctx, name, metav1.GetOptions{})
+		single, err := dr.Get(ctx, name, metav1.GetOptions{})
 		outerr = err
-		if item != nil {
-			objects.Items = append(objects.Items, *item)
+		if single != nil {
+			resp.Objects = append(resp.Objects, single.Object)
 		}
 	} else {
 		list, err := dr.List(ctx, metav1.ListOptions{
@@ -143,26 +159,36 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 		})
 		outerr = err
 		if list != nil {
-			objects = list
+			for _, item := range list.Items {
+				resp.Objects = append(resp.Objects, item.Object)
+			}
 		}
 	}
+	resp.Error = outerr
 
-	return objects, outerr
+	return resp
 }
 
 // Kubernetes delete operation with dynamic client
-func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured) error {
+func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured) *Response {
 
 	var dr dynamic.ResourceInterface
+	var resp = &Response{
+		Error:   nil,
+		Objects: nil,
+		Output:  "",
+	}
 
 	mapper, err := getRESTMapper(k.Config)
 	if err != nil {
-		return err
+		resp.Error = err
+		return resp
 	}
 
 	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
 	if err != nil {
-		return err
+		resp.Error = err
+		return resp
 	}
 
 	namespace := getNamespace(obj, mapping)
@@ -177,9 +203,9 @@ func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured)
 	deleteOptions := metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}
-	err = dr.Delete(ctx, obj.GetName(), deleteOptions)
+	resp.Error = dr.Delete(ctx, obj.GetName(), deleteOptions)
 
-	return err
+	return resp
 }
 
 // Pod exec method to run commands and fetch outputs (stdout/stderr)

@@ -57,13 +57,13 @@ func (ctrl *KubeController) Run() (*Report, error) {
 			var err error
 			var msg string
 
-			if ops.Action == APPLY_OPERATION {
+			if ops.Action == APPLY_ACTION {
 				msg, err = ctrl.apply(ops)
-			} else if ops.Action == GET_OPERATION {
-				_ = ctrl.get(ops)
-			} else if ops.Action == DELETE_OPERATION {
+			} else if ops.Action == GET_ACTION {
+				fmt.Println(ctrl.get(ops))
+			} else if ops.Action == DELETE_ACTION {
 				msg, err = ctrl.delete(ops)
-			} else if ops.Action == EXEC_OPERATION {
+			} else if ops.Action == EXEC_ACTION {
 				msg, err = ctrl.exec(ops)
 			} else {
 				err = fmt.Errorf("invalid operation in testcase %s", testcase.Name)
