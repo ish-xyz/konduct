@@ -1,13 +1,14 @@
 name: test-case-1
 operations:
-
   - action: apply
     template: template-1
+    # retries: 10
+    # timeout: 10s
     templateValues:
       namespace: default
       name: pod-name
     assert: |
-      Data.Error == "";
+      data.error == "";
 
   - action: get
     apiVersion: v1
@@ -16,9 +17,9 @@ operations:
     name: pod-name
     labelSelector: ""
     assert: |
-      len(Data.Objects) == 1;
-      Data.Objects[0]["metadata"]["name"] == "pod-name";
-      Data.Error == "";
+      len(data.objects) == 1;
+      data.objects[0]["metadata"]["name"] == "pod-name";
+      data.error == "";
 
   - action: delete
     template: template-1
@@ -26,7 +27,7 @@ operations:
       namespace: default
       name: pod-name
     assert: |
-      Data.Error == "";
+      data.error == "";
 
 
   # - action: get

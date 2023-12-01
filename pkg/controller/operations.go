@@ -26,8 +26,12 @@ const (
 
 func runAssertions(code string, resp *client.Response, opsResult *exporter.OperationResult) *exporter.OperationResult {
 
-	env := Env{
-		Data: resp,
+	env := map[string]interface{}{
+		"data": map[string]interface{}{
+			"output":  resp.Output,
+			"objects": resp.Objects,
+			"error":   resp.Error,
+		},
 	}
 
 	// Set to true and if any expression fails set to false
