@@ -1,6 +1,9 @@
 package exporter
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // OperationResult functions
 type OperationResult struct {
@@ -24,7 +27,7 @@ func (or *OperationResult) Str(everything bool) string {
 	msg := ""
 	for _, expr := range or.ExprResults {
 		if expr[1] == false || everything {
-			msg = fmt.Sprintf("		%s\n%s -> %v", msg, expr[0], expr[1])
+			msg = fmt.Sprintf("		%s\n	* %s %v", msg, expr[0], expr[1])
 		}
 	}
 	return msg
@@ -88,16 +91,17 @@ func (r *Report) Add(tr *TestResult) {
 func (r *Report) Stdout(everything bool) {
 	if r.Status {
 		fmt.Printf("tests succeded!\ncompleted tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
-		fmt.Println("expressions:")
 	} else {
 		fmt.Printf("tests failed!\ncompleted tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
-		fmt.Println("errors:")
 	}
 
-	for _, res := range r.Results {
+	fmt.Println("results:")
 
+	for _, res := range r.Results {
+		fmt.Println(res.FilePath)
 		if !res.Status || everything {
-			fmt.Printf("%s\n", res.Message)
+			fmt.Printf("	%s\n", strings.TrimSpace(res.Message))
 		}
+		fmt.Println("--")
 	}
 }

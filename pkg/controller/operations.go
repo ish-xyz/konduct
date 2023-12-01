@@ -34,9 +34,6 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 		},
 	}
 
-	// Set to true and if any expression fails set to false
-	opsResult.Status = true
-
 	for _, line := range strings.Split(code, ";") {
 
 		line = strings.TrimSpace(line)
@@ -46,23 +43,24 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 
 		// Compile expression
 		program, err := expr.Compile(line, expr.Env(env))
+		opsResult.Status = err == nil
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s' >> '%v", line, err), false})
-			opsResult.Status = false
+			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s' >> '%v", line, err), opsResult.Status})
+
 			break
 		}
 
 		// Run expression
 		output, err := expr.Run(program, env)
+		opsResult.Status = err == nil
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot run expression: '%s' >> '%v", line, err), false})
-			opsResult.Status = false
+			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot run expression: '%s' >> '%v", line, err), opsResult.Status})
 			break
 		}
 
 		opsResult.AddExpr([2]interface{}{line, output})
+		opsResult.Status = output != false
 		if output == false {
-			opsResult.Status = false
 			break
 		}
 	}

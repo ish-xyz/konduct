@@ -1,4 +1,4 @@
-name: test-case-1
+name: test-case-2
 operations:
   - action: apply
     template: template-1
