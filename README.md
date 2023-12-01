@@ -1,7 +1,7 @@
 Controller to run integration tests on Kubernetes
 
 
-TODO:
+**TODO**:
 
 * [x] build command line 
 * [x] build exporter for prometheus (push gateway)
