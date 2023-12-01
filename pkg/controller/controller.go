@@ -48,7 +48,6 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 			if ops.Action == GET_ACTION {
 				opsres = ctrl.get(ops)
-
 			} else if ops.Action == APPLY_ACTION {
 				opsres = ctrl.apply(ops)
 			} else if ops.Action == DELETE_ACTION {
