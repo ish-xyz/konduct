@@ -24,15 +24,10 @@ const (
 	REGEX_OPERATOR = "regex:"
 )
 
-type Env struct {
-	Input *client.Response
-	Print func(format string, a ...any) string
-}
-
 func runAssertions(code string, resp *client.Response, opsResult *exporter.OperationResult) *exporter.OperationResult {
 
 	env := Env{
-		Input: resp,
+		Data: resp,
 	}
 
 	// Set to true and if any expression fails set to false
@@ -48,7 +43,7 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 		// Compile expression
 		program, err := expr.Compile(line, expr.Env(env))
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s'", line), false})
+			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s' >> '%v", line, err), false})
 			opsResult.Status = false
 			break
 		}
@@ -56,7 +51,7 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 		// Run expression
 		output, err := expr.Run(program, env)
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot run expression: '%s'", line), false})
+			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot run expression: '%s' >> '%v", line, err), false})
 			opsResult.Status = false
 			break
 		}
@@ -108,8 +103,6 @@ func (ctrl *KubeController) apply(ops *loader.TestOperation) *exporter.Operation
 	}
 	resp := ctrl.Client.Apply(context.TODO(), objects)
 	opsResult = runAssertions(ops.Assert, resp, opsResult)
-
-	fmt.Println(opsResult)
 
 	return opsResult
 }

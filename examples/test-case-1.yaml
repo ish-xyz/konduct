@@ -7,19 +7,18 @@ operations:
       namespace: default
       name: pod-name
     assert: |
-      Input.Error == nil;
+      Data.Error == "";
 
-  # - action: get
-  #   apiVersion: v1
-  #   kind: Pod
-  #   namespace: default
-  #   name: po
-  #   labelSelector: ""
-  #   assert: |
-  #     len(Input.Objects) == 1;
-  #     Input.Objects[0]["metadata"]["name"] == "po";
-  #     Input.Error == nil;
-  #     Input.Objects[0]["apiVersion"];
+  - action: get
+    apiVersion: v1
+    kind: Pod
+    namespace: default
+    name: pod-name
+    labelSelector: ""
+    assert: |
+      len(Data.Objects) == 1;
+      Data.Objects[0]["metadata"]["name"] == "pod-name";
+      Data.Error == "";
 
   # - action: get
   #   apiVersion: v1
@@ -30,14 +29,10 @@ operations:
   #   assert: |
   #     Input.Objects
 
-
   # - action: exec
   #   name: pod
   #   namespace: default
-  #   command: ["any command"]
+  #   command: ["nslookup diffUrl"]
   #   assert: |
-  #     Input.Error != nil;
-  #     Input.Error matches "^permission denied.*";
-  #     Input.Output == "";
-
+  #     Data.Message == "192.168.0.1"
 

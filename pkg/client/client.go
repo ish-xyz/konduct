@@ -54,6 +54,14 @@ func getRESTMapper(restconfig *rest.Config) (meta.RESTMapper, error) {
 	return mapper, nil
 }
 
+func (r *Response) SetError(err error) {
+	if err != nil {
+		r.Error = fmt.Sprintf("%v", err)
+	} else {
+		r.Error = ""
+	}
+}
+
 func getNamespace(obj *unstructured.Unstructured, mapping *meta.RESTMapping) string {
 	// Default to "default" namespace if not specified
 	namespace := obj.GetNamespace()
@@ -89,14 +97,14 @@ func (k *KubeClient) Apply(ctx context.Context, objects []*unstructured.Unstruct
 	var dr dynamic.ResourceInterface
 
 	var resp = &Response{
-		Error:   nil,
+		Error:   "",
 		Objects: nil,
 		Output:  "",
 	}
 
 	mapper, err := getRESTMapper(k.Config)
 	if err != nil {
-		resp.Error = err
+		resp.Error = fmt.Sprintf("%v", err)
 		return resp
 	}
 
@@ -104,7 +112,7 @@ func (k *KubeClient) Apply(ctx context.Context, objects []*unstructured.Unstruct
 
 		mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
 		if err != nil {
-			resp.Error = err
+			resp.SetError(err)
 			return resp
 		}
 
@@ -118,10 +126,10 @@ func (k *KubeClient) Apply(ctx context.Context, objects []*unstructured.Unstruct
 		// Check if namespace is empty and if resource is namespaced or not
 		data, err := json.Marshal(obj)
 		if err != nil {
-			resp.Error = err
+			resp.SetError(err)
 			return resp
 		}
-		_, resp.Error = dr.Patch(
+		_, err = dr.Patch(
 			ctx,
 			obj.GetName(),
 			types.ApplyPatchType,
@@ -130,6 +138,7 @@ func (k *KubeClient) Apply(ctx context.Context, objects []*unstructured.Unstruct
 				FieldManager: "go-kubetest",
 			},
 		)
+		resp.SetError(err)
 	}
 
 	return resp
@@ -140,7 +149,7 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 
 	var dr dynamic.ResourceInterface
 	var resp = &Response{
-		Error:   nil,
+		Error:   "",
 		Objects: nil,
 		Output:  "",
 	}
@@ -153,13 +162,13 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 
 	mapper, err := getRESTMapper(k.Config)
 	if err != nil {
-		resp.Error = err
+		resp.SetError(err)
 		return resp
 	}
 
 	mapping, err := mapper.RESTMapping(schema.GroupKind{Kind: kind, Group: group})
 	if err != nil {
-		resp.Error = err
+		resp.SetError(err)
 		return resp
 	}
 
@@ -192,7 +201,7 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 			}
 		}
 	}
-	resp.Error = outerr
+	resp.SetError(outerr)
 
 	return resp
 }
@@ -202,20 +211,20 @@ func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured)
 
 	var dr dynamic.ResourceInterface
 	var resp = &Response{
-		Error:   nil,
+		Error:   "",
 		Objects: nil,
 		Output:  "",
 	}
 
 	mapper, err := getRESTMapper(k.Config)
 	if err != nil {
-		resp.Error = err
+		resp.Error = fmt.Sprintf("%v", err)
 		return resp
 	}
 
 	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
 	if err != nil {
-		resp.Error = err
+		resp.Error = fmt.Sprintf("%v", err)
 		return resp
 	}
 
@@ -231,7 +240,7 @@ func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured)
 	deleteOptions := metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}
-	resp.Error = dr.Delete(ctx, obj.GetName(), deleteOptions)
+	resp.Error = fmt.Sprintf("%v", dr.Delete(ctx, obj.GetName(), deleteOptions))
 
 	return resp
 }

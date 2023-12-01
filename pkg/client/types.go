@@ -25,7 +25,7 @@ type KubeClient struct {
 }
 
 type Response struct {
-	Error   error
+	Error   string
 	Output  string
 	Objects []map[string]interface{}
 }

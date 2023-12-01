@@ -21,3 +21,8 @@ type Payload struct {
 	Message string
 	Status  int
 }
+
+type Env struct {
+	Data  *client.Response
+	Print func(format string, a ...any) string
+}
