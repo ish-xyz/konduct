@@ -54,6 +54,7 @@ func getRESTMapper(restconfig *rest.Config) (meta.RESTMapper, error) {
 	return mapper, nil
 }
 
+// TODO: change the "resp.SetError(err)" approach, ugly
 func (r *Response) SetError(err error) {
 	if err != nil {
 		r.Error = fmt.Sprintf("%v", err)
