@@ -27,7 +27,7 @@ func (or *OperationResult) Str(everything bool) string {
 	msg := ""
 	for _, expr := range or.ExprResults {
 		if expr[1] == false || everything {
-			msg = fmt.Sprintf("		%s\n	* %s %v", msg, expr[0], expr[1])
+			msg = fmt.Sprintf("%s\n	* %s %v", msg, expr[0], expr[1])
 		}
 	}
 	return msg
