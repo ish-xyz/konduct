@@ -20,6 +20,15 @@ operations:
       Data.Objects[0]["metadata"]["name"] == "pod-name";
       Data.Error == "";
 
+  - action: delete
+    template: template-1
+    templateValues:
+      namespace: default
+      name: pod-name
+    assert: |
+      Data.Error == "";
+
+
   # - action: get
   #   apiVersion: v1
   #   kind: Pod

@@ -107,13 +107,33 @@ func (ctrl *KubeController) apply(ops *loader.TestOperation) *exporter.Operation
 	return opsResult
 }
 
-func (ctrl *KubeController) delete(ops *loader.TestOperation) (string, error) {
-	//TODO:
-	// render template
-	// run command and get response
-	// run assertions
-	// return operationResult
-	return "", nil
+func (ctrl *KubeController) delete(ops *loader.TestOperation) *exporter.OperationResult {
+	opsResult := &exporter.OperationResult{
+		Status:      false,
+		ExprResults: make([][2]interface{}, 0),
+	}
+
+	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
+	if err != nil {
+		opsResult.AddExpr([2]interface{}{fmt.Sprintf("can't load template %s", ops.Template), false})
+		return opsResult
+	}
+	raw := new(bytes.Buffer)
+	templ := template.Must(template.New("").Parse(tpl.Data))
+	err = templ.Execute(raw, ops.TemplateValues)
+	if err != nil {
+		return opsResult
+	}
+
+	objects, err := client.GetUnstructuredFromYAML(raw.String())
+	if err != nil {
+		return opsResult
+	}
+	resp := ctrl.Client.Delete(context.TODO(), objects)
+	opsResult = runAssertions(ops.Assert, resp, opsResult)
+
+	return opsResult
+
 }
 
 func (ctrl *KubeController) exec(ops *loader.TestOperation) (string, error) {

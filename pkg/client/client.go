@@ -207,7 +207,7 @@ func (k *KubeClient) Get(ctx context.Context, apiVersion, kind, namespace, name,
 }
 
 // Kubernetes delete operation with dynamic client
-func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured) *Response {
+func (k *KubeClient) Delete(ctx context.Context, objects []*unstructured.Unstructured) *Response {
 
 	var dr dynamic.ResourceInterface
 	var resp = &Response{
@@ -222,26 +222,32 @@ func (k *KubeClient) Delete(ctx context.Context, obj *unstructured.Unstructured)
 		return resp
 	}
 
-	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
-	if err != nil {
-		resp.Error = fmt.Sprintf("%v", err)
-		return resp
+	for _, obj := range objects {
+
+		mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
+		if err != nil {
+			resp.Error = fmt.Sprintf("%v", err)
+			return resp
+		}
+		namespace := getNamespace(obj, mapping)
+
+		dr = k.DynClient.Resource(mapping.Resource)
+		if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+			dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
+		}
+
+		// Exec rest request to API
+		deletePolicy := metav1.DeletePropagationForeground
+		deleteOptions := metav1.DeleteOptions{
+			PropagationPolicy: &deletePolicy,
+		}
+		err = dr.Delete(ctx, obj.GetName(), deleteOptions)
+		if err != nil {
+			resp.SetError(err)
+			return resp
+		}
+
 	}
-
-	namespace := getNamespace(obj, mapping)
-
-	dr = k.DynClient.Resource(mapping.Resource)
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
-	}
-
-	// Exec rest request to API
-	deletePolicy := metav1.DeletePropagationForeground
-	deleteOptions := metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	}
-	resp.Error = fmt.Sprintf("%v", dr.Delete(ctx, obj.GetName(), deleteOptions))
-
 	return resp
 }
 

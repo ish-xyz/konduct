@@ -51,6 +51,8 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 			} else if ops.Action == APPLY_ACTION {
 				opsres = ctrl.apply(ops)
+			} else if ops.Action == DELETE_ACTION {
+				opsres = ctrl.delete(ops)
 			} else {
 				opsres.Status = false
 				opsres.AddExpr(
