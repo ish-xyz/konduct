@@ -1,0 +1,20 @@
+name: teamplate-1
+data: |
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: {{ .name }}
+    namespace: {{ .namespace }}
+  spec:
+    containers:
+    - args:
+      - sleep
+      - "9999999"
+      image: busybox:latest
+      imagePullPolicy: Always
+      name: {{ .name }}
+      resources: {}
+    restartPolicy: Always
+
+
+

@@ -48,6 +48,9 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 			if ops.Action == GET_ACTION {
 				opsres = ctrl.get(ops)
+
+			} else if ops.Action == APPLY_ACTION {
+				opsres = ctrl.apply(ops)
 			} else {
 				opsres.Status = false
 				opsres.AddExpr(
@@ -56,8 +59,7 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 						false,
 					})
 			}
-
-			testResult.Set(opsres.Status, opsres.Str(false))
+			testResult.Set(opsres.Status, opsres.Str(true))
 		}
 
 		report.Add(testResult)

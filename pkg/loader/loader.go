@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	PLACE_HOLDER_EMPTY = "PLACE_HOLDER_EMPTY"
+	TEMPLATE_FOLDER = "templates"
 )
 
 func NewLoader(testsFolder, templatesFolder string) Loader {
@@ -47,11 +47,13 @@ func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 	return testcase, nil
 }
 
-func (ldr *FSloader) LoadTemplate(fname string) (*TestTemplate, error) {
+func (ldr *FSloader) LoadTemplate(tname string) (*TestTemplate, error) {
 
 	var testTempl *TestTemplate
 
-	data, err := os.ReadFile(fname)
+	tplname := fmt.Sprintf("%s/%s/%s.yaml", ldr.TestsFolder, TEMPLATE_FOLDER, tname)
+
+	data, err := os.ReadFile(tplname)
 	if err != nil {
 		return nil, err
 	}

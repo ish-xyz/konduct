@@ -13,6 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	kyaml "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -21,6 +22,10 @@ import (
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/kubectl/pkg/scheme"
+)
+
+const (
+	YAML_DELIMITER = "---"
 )
 
 func NewKubeClient(clientset *kubernetes.Clientset, dynclient dynamic.Interface, config *rest.Config) *KubeClient {
@@ -58,10 +63,31 @@ func getNamespace(obj *unstructured.Unstructured, mapping *meta.RESTMapping) str
 	return namespace
 }
 
+func GetUnstructuredFromYAML(payload string) ([]*unstructured.Unstructured, error) {
+
+	var objects []*unstructured.Unstructured
+	var err error
+
+	data := strings.Split(payload, YAML_DELIMITER)
+	decUnstructured := kyaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+
+	for _, manifest := range data {
+		unstructObject := &unstructured.Unstructured{}
+		_, _, err = decUnstructured.Decode([]byte(manifest), nil, unstructObject)
+		if err != nil {
+			return nil, err
+		}
+		objects = append(objects, unstructObject)
+	}
+
+	return objects, err
+}
+
 // Implementation of Kubernetes server side apply
-func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) *Response {
+func (k *KubeClient) Apply(ctx context.Context, objects []*unstructured.Unstructured) *Response {
 
 	var dr dynamic.ResourceInterface
+
 	var resp = &Response{
 		Error:   nil,
 		Objects: nil,
@@ -74,37 +100,39 @@ func (k *KubeClient) Apply(ctx context.Context, obj *unstructured.Unstructured) 
 		return resp
 	}
 
-	mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
-	if err != nil {
-		resp.Error = err
-		return resp
-	}
+	for _, obj := range objects {
 
-	namespace := getNamespace(obj, mapping)
+		mapping, err := mapper.RESTMapping(schema.ParseGroupKind(obj.GroupVersionKind().GroupKind().String()))
+		if err != nil {
+			resp.Error = err
+			return resp
+		}
 
-	dr = k.DynClient.Resource(mapping.Resource)
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
-	}
+		namespace := getNamespace(obj, mapping)
 
-	// Check if namespace is empty and if resource is namespaced or not
-	data, err := json.Marshal(obj)
-	if err != nil {
-		resp.Error = err
-		return resp
+		dr = k.DynClient.Resource(mapping.Resource)
+		if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+			dr = k.DynClient.Resource(mapping.Resource).Namespace(namespace)
+		}
+
+		// Check if namespace is empty and if resource is namespaced or not
+		data, err := json.Marshal(obj)
+		if err != nil {
+			resp.Error = err
+			return resp
+		}
+		_, resp.Error = dr.Patch(
+			ctx,
+			obj.GetName(),
+			types.ApplyPatchType,
+			data,
+			metav1.PatchOptions{
+				FieldManager: "go-kubetest",
+			},
+		)
 	}
-	_, resp.Error = dr.Patch(
-		ctx,
-		obj.GetName(),
-		types.ApplyPatchType,
-		data,
-		metav1.PatchOptions{
-			FieldManager: "go-kubetest",
-		},
-	)
 
 	return resp
-
 }
 
 // Kubernetes Get/List operation with dynamic client for custom and core types.

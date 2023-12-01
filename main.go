@@ -33,7 +33,7 @@ func main() {
 		panic(err)
 	}
 
-	report.Stdout(false)
+	report.Stdout(true)
 
 	return
 }

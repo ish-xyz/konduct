@@ -25,7 +25,8 @@ type TestCase struct {
 
 type TestOperation struct {
 
-	// Apply & Delete
+	// Setup
+	Teardown       bool                   `yaml:"teardown,omitempty"`
 	Template       string                 `yaml:"template,omitempty"`
 	TemplateValues map[string]interface{} `yaml:"templateValues,omitempty"`
 
