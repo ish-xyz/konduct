@@ -98,7 +98,7 @@ func (r *Report) Stdout(everything bool) {
 	fmt.Println("results:")
 
 	for _, res := range r.Results {
-		fmt.Println(res.FilePath)
+		fmt.Println(">>", res.FilePath)
 		if !res.Status || everything {
 			fmt.Printf("	%s\n", strings.TrimSpace(res.Message))
 		}

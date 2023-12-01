@@ -46,7 +46,6 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 		opsResult.Status = err == nil
 		if err != nil {
 			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s' >> '%v", line, err), opsResult.Status})
-
 			break
 		}
 
