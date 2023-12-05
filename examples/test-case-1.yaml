@@ -14,23 +14,24 @@ operations:
     apiVersion: v1
     kind: Pod
     namespace: default
-    name: pod-name
+    name: pod-namesss
     labelSelector: ""
     assert: |
-      len(data.objects) == 1;
-      data.objects[0]["metadata"]["name"] == "pod-name";
-      data.error == "";
+      data.error;
+  # len(data.objects) == 1;
+  # data.objects[0]["metadata"]["name"] == "pod-name";
+  # data.error == "";
 
-  - action: get
-    apiVersion: v1
-    kind: Pod
-    namespace: default
-    name: pod-name
-    labelSelector: ""
-    assert: |
-      len(data.objects) == 1;
-      data.objects[0]["metadata"]["name"] == "pod-name";
-      data.error == "";
+  # - action: get
+  #   apiVersion: v1
+  #   kind: Pod
+  #   namespace: default
+  #   name: pod-name
+  #   labelSelector: ""
+  #   assert: |
+  #     len(data.objects) == 1;
+  #     data.objects[0]["metadata"]["name"] == "pod-name";
+  #     data.error == "";
 
   # - action: delete
   #   template: template-1

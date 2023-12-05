@@ -23,7 +23,7 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 	testfiles, err := ctrl.Loader.ListTestCases()
 	if err != nil {
-		// TODO: report should be updated here
+		//TODO: update report as failed
 		return nil, err
 	}
 
@@ -31,7 +31,6 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 		testResult := exporter.NewTestResult(tf)
 		testcase, err := ctrl.Loader.LoadTestCase(tf)
-
 		if err != nil {
 			ctrl.logger.Errorf("failed to load test file %s", tf)
 
@@ -48,23 +47,19 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 			if op.Action == GET_ACTION {
 				opresult, err = ctrl.get(op)
-				// } else if op.Action == APPLY_ACTION {
-				// 	opresult = ctrl.apply(op)
+			} else if op.Action == APPLY_ACTION {
+				opresult, err = ctrl.apply(op)
 				// } else if op.Action == DELETE_ACTION {
 				// 	opresult = ctrl.delete(op)
+			} else {
+				err = fmt.Errorf("unkown action '%s'", op.Action)
+				opresult.Expressions = append(opresult.Expressions, &exporter.ExpressionResult{Expression: ""})
 			}
-			// else {
-			// 	opresult.Status = false
-			// 	opresult.AddExpr(
-			// 		[2]interface{}{
-			// 			fmt.Sprintf("invalid operation %s in testcase %s", ops.Action, testcase.Name),
-			// 			false,
-			// 		})
-			// }
-			if err != nil {
+
+			if err != nil && len(opresult.Expressions) > 0 {
 				opresult.Expressions[len(opresult.Expressions)-1].Output = fmt.Sprintf("%v", err)
 			}
-			testResult.Status = err == nil
+			opresult.Status = (err == nil)
 			testResult.Set(opresult.Status, opresult.Str(true))
 		}
 
