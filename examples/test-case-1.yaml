@@ -1,7 +1,7 @@
 name: test-case-1
 operations:
   - action: apply
-    template: template-1
+    template: template-1gg
     # retries: 10
     # timeout: 10s
     templateValues:
