@@ -42,25 +42,30 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 
 		testResult.Name = testcase.Name
 
-		for _, ops := range testcase.Operations {
+		for _, op := range testcase.Operations {
 
-			var opsres = exporter.NewOperationResult()
+			var opresult = exporter.NewOperationResult()
 
-			if ops.Action == GET_ACTION {
-				opsres = ctrl.get(ops)
-			} else if ops.Action == APPLY_ACTION {
-				opsres = ctrl.apply(ops)
-			} else if ops.Action == DELETE_ACTION {
-				opsres = ctrl.delete(ops)
-			} else {
-				opsres.Status = false
-				opsres.AddExpr(
-					[2]interface{}{
-						fmt.Sprintf("invalid operation %s in testcase %s", ops.Action, testcase.Name),
-						false,
-					})
+			if op.Action == GET_ACTION {
+				opresult, err = ctrl.get(op)
+				// } else if op.Action == APPLY_ACTION {
+				// 	opresult = ctrl.apply(op)
+				// } else if op.Action == DELETE_ACTION {
+				// 	opresult = ctrl.delete(op)
 			}
-			testResult.Set(opsres.Status, opsres.Str(true))
+			// else {
+			// 	opresult.Status = false
+			// 	opresult.AddExpr(
+			// 		[2]interface{}{
+			// 			fmt.Sprintf("invalid operation %s in testcase %s", ops.Action, testcase.Name),
+			// 			false,
+			// 		})
+			// }
+			if err != nil {
+				opresult.Expressions[len(opresult.Expressions)-1].Output = fmt.Sprintf("%v", err)
+			}
+			testResult.Status = err == nil
+			testResult.Set(opresult.Status, opresult.Str(true))
 		}
 
 		report.Add(testResult)

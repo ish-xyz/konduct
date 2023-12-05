@@ -1,10 +1,7 @@
 package controller
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"html/template"
 	"strings"
 
 	"github.com/antonmedv/expr"
@@ -24,7 +21,7 @@ const (
 	REGEX_OPERATOR = "regex:"
 )
 
-func runAssertions(code string, resp *client.Response, opsResult *exporter.OperationResult) *exporter.OperationResult {
+func runAssertions(code string, resp *client.Response) ([]*exporter.ExpressionResult, error) {
 
 	env := map[string]interface{}{
 		"data": map[string]interface{}{
@@ -34,6 +31,8 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 		},
 	}
 
+	expressionResults := make([]*exporter.ExpressionResult, 0)
+
 	for _, line := range strings.Split(code, ";") {
 
 		line = strings.TrimSpace(line)
@@ -41,106 +40,114 @@ func runAssertions(code string, resp *client.Response, opsResult *exporter.Opera
 			continue
 		}
 
+		singleExprResult := &exporter.ExpressionResult{}
+		singleExprResult.Expression = line
+
+		expressionResults = append(expressionResults, singleExprResult)
+
 		// Compile expression
 		program, err := expr.Compile(line, expr.Env(env))
-		opsResult.Status = err == nil
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot compile expression: '%s' >> '%v", line, err), opsResult.Status})
-			break
+			//fmt.Sprintf("cannot compile expression: '%s' >> '%v", line, err)
+			return expressionResults, err
 		}
 
 		// Run expression
 		output, err := expr.Run(program, env)
-		opsResult.Status = err == nil
 		if err != nil {
-			opsResult.AddExpr([2]interface{}{fmt.Sprintf("cannot run expression: '%s' >> '%v", line, err), opsResult.Status})
-			break
+			//fmt.Sprintf("cannot run expression: '%s' >> '%v", line, err)
+			return expressionResults, err
 		}
 
-		opsResult.AddExpr([2]interface{}{line, output})
-		opsResult.Status = output != false
+		singleExprResult.Output = output
 		if output == false {
-			break
+			return expressionResults, err
 		}
 	}
 
-	return opsResult
+	return expressionResults, nil
 }
 
-func (ctrl *KubeController) get(ops *loader.TestOperation) *exporter.OperationResult {
+func (ctrl *KubeController) get(ops *loader.TestOperation) (*exporter.OperationResult, error) {
+
+	var err error
+
 	opsResult := &exporter.OperationResult{
 		Status:      false,
-		ExprResults: make([][2]interface{}, 0),
+		Expressions: make([]*exporter.ExpressionResult, 0),
 	}
-
 	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
-	data := runAssertions(ops.Assert, resp, opsResult)
+	opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 
-	return data
+	return opsResult, err
 }
 
-func (ctrl *KubeController) apply(ops *loader.TestOperation) *exporter.OperationResult {
+// func (ctrl *KubeController) apply(ops *loader.TestOperation) *exporter.OperationResult {
 
-	opsResult := &exporter.OperationResult{
-		Status:      false,
-		ExprResults: make([][2]interface{}, 0),
-	}
+// 	opsResult := &exporter.OperationResult{
+// 		Status:      false,
+// 		Expressions: make([]*exporter.ExpressionResult, 0),
+// 	}
 
-	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
-	if err != nil {
-		opsResult.AddExpr([2]interface{}{fmt.Sprintf("can't load template %s", ops.Template), false})
-		return opsResult
-	}
-	raw := new(bytes.Buffer)
-	templ := template.Must(template.New("").Parse(tpl.Data))
-	err = templ.Execute(raw, ops.TemplateValues)
-	if err != nil {
-		return opsResult
-	}
+// 	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
+// 	if err != nil {
+// 		// update expressions, can't load template
+// 		return opsResult
+// 	}
+// 	raw := new(bytes.Buffer)
+// 	templ := template.Must(template.New("").Parse(tpl.Data))
+// 	err = templ.Execute(raw, ops.TemplateValues)
+// 	if err != nil {
+// 		// TODO: update expressions
+// 		return opsResult
+// 	}
 
-	objects, err := client.GetUnstructuredFromYAML(raw.String())
-	if err != nil {
-		return opsResult
-	}
-	resp := ctrl.Client.Apply(context.TODO(), objects)
-	opsResult = runAssertions(ops.Assert, resp, opsResult)
+// 	objects, err := client.GetUnstructuredFromYAML(raw.String())
+// 	if err != nil {
+// 		// TODO update expressions
+// 		return opsResult
+// 	}
+// 	resp := ctrl.Client.Apply(context.TODO(), objects)
+// 	opsResult.Expressions, opsResult.Status = runAssertions(ops.Assert, resp)
 
-	return opsResult
-}
+// 	return opsResult
+// }
 
-func (ctrl *KubeController) delete(ops *loader.TestOperation) *exporter.OperationResult {
-	opsResult := &exporter.OperationResult{
-		Status:      false,
-		ExprResults: make([][2]interface{}, 0),
-	}
+// func (ctrl *KubeController) delete(ops *loader.TestOperation) *exporter.OperationResult {
+// 	opsResult := &exporter.OperationResult{
+// 		Status:      false,
+// 		Expressions: make([]*exporter.ExpressionResult, 0),
+// 	}
 
-	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
-	if err != nil {
-		opsResult.AddExpr([2]interface{}{fmt.Sprintf("can't load template %s", ops.Template), false})
-		return opsResult
-	}
-	raw := new(bytes.Buffer)
-	templ := template.Must(template.New("").Parse(tpl.Data))
-	err = templ.Execute(raw, ops.TemplateValues)
-	if err != nil {
-		return opsResult
-	}
+// 	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
+// 	if err != nil {
+// 		// TODO:
+// 		return opsResult
+// 	}
+// 	raw := new(bytes.Buffer)
+// 	templ := template.Must(template.New("").Parse(tpl.Data))
+// 	err = templ.Execute(raw, ops.TemplateValues)
+// 	if err != nil {
+// 		// TODO:
+// 		return opsResult
+// 	}
 
-	objects, err := client.GetUnstructuredFromYAML(raw.String())
-	if err != nil {
-		return opsResult
-	}
-	resp := ctrl.Client.Delete(context.TODO(), objects)
-	opsResult = runAssertions(ops.Assert, resp, opsResult)
+// 	objects, err := client.GetUnstructuredFromYAML(raw.String())
+// 	if err != nil {
+// 		// TODO:
+// 		return opsResult
+// 	}
+// 	resp := ctrl.Client.Delete(context.TODO(), objects)
+// 	opsResult.Expressions, opsResult.Status = runAssertions(ops.Assert, resp)
 
-	return opsResult
+// 	return opsResult
 
-}
+// }
 
-func (ctrl *KubeController) exec(ops *loader.TestOperation) (string, error) {
-	//TODO:
-	// run command and get response
-	// run assertions
-	// return operationResult
-	return "", nil
-}
+// func (ctrl *KubeController) exec(ops *loader.TestOperation) (string, error) {
+// 	//TODO:
+// 	// run command and get response
+// 	// run assertions
+// 	// return operationResult
+// 	return "", nil
+// }
