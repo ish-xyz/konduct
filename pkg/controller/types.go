@@ -12,9 +12,10 @@ type Controller interface {
 }
 
 type KubeController struct {
-	Loader loader.Loader
-	Client client.Client
-	logger *logrus.Entry
+	Loader   loader.Loader
+	Client   client.Client
+	Exporter exporter.Exporter
+	logger   *logrus.Entry
 }
 
 type Payload struct {

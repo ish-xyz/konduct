@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"fmt"
-	"strings"
 )
 
 func NewTestResult(tf string) *TestResult {
@@ -11,15 +10,6 @@ func NewTestResult(tf string) *TestResult {
 		Name:     "",
 		Status:   true,
 		Message:  "",
-	}
-}
-
-func NewReport() *Report {
-	return &Report{
-		Succeded: 0,
-		Failed:   0,
-		Status:   true,
-		Results:  []*TestResult{},
 	}
 }
 
@@ -49,37 +39,5 @@ func (tr *TestResult) Set(status bool, msg string) {
 	tr.Message = fmt.Sprintf("%s\n%s", tr.Message, msg)
 	if tr.Status && !status {
 		tr.Status = status
-	}
-}
-
-func (r *Report) Add(tr *TestResult) {
-
-	r.Results = append(r.Results, tr)
-	if !tr.Status {
-		r.Failed++
-	} else {
-		r.Succeded++
-	}
-
-	if !tr.Status && r.Status {
-		r.Status = false
-	}
-}
-
-func (r *Report) Stdout(everything bool) {
-	if r.Status {
-		fmt.Printf("tests succeded!\ncompleted tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
-	} else {
-		fmt.Printf("tests failed!\ncompleted tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
-	}
-
-	fmt.Println("results:")
-
-	for _, res := range r.Results {
-		fmt.Println(">>", res.FilePath)
-		if !res.Status || everything {
-			fmt.Printf("	%s\n", strings.TrimSpace(res.Message))
-		}
-		fmt.Println("--")
 	}
 }

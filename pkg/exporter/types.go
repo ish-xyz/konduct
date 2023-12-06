@@ -13,10 +13,18 @@ type FileExporter struct {
 	Path string
 }
 
+type StdoutExporter struct {
+	PrintAll bool
+}
+
 // OperationResult functions
 type OperationResult struct {
 	Status      bool
 	Expressions []*ExpressionResult
+}
+
+type Exporter interface {
+	Export(r *Report) error
 }
 
 type ExpressionResult struct {
