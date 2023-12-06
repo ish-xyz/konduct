@@ -49,8 +49,8 @@ func (ctrl *KubeController) Exec() (*exporter.Report, error) {
 				opresult, err = ctrl.get(op)
 			} else if op.Action == APPLY_ACTION {
 				opresult, err = ctrl.apply(op)
-				// } else if op.Action == DELETE_ACTION {
-				// 	opresult = ctrl.delete(op)
+			} else if op.Action == DELETE_ACTION {
+				opresult, err = ctrl.delete(op)
 			} else {
 				err = fmt.Errorf("unkown action '%s'", op.Action)
 				opresult.Expressions = append(opresult.Expressions, &exporter.ExpressionResult{Expression: ""})

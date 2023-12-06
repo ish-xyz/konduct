@@ -92,7 +92,6 @@ func (ctrl *KubeController) apply(ops *loader.TestOperation) (*exporter.Operatio
 
 	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
 	if err != nil {
-		// update expressions, can't load template
 		return opsResult, err
 	}
 
@@ -100,17 +99,46 @@ func (ctrl *KubeController) apply(ops *loader.TestOperation) (*exporter.Operatio
 	templ := template.Must(template.New("").Parse(tpl.Data))
 	err = templ.Execute(raw, ops.TemplateValues)
 	if err != nil {
-		// TODO: update expressions
 		return opsResult, err
 	}
 
 	objects, err := client.GetUnstructuredFromYAML(raw.String())
 	if err != nil {
-		// TODO update expressions
 		return opsResult, err
 	}
 
 	resp := ctrl.Client.Apply(context.TODO(), objects)
+	opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+
+	return opsResult, err
+}
+
+func (ctrl *KubeController) delete(ops *loader.TestOperation) (*exporter.OperationResult, error) {
+
+	eexp := &exporter.ExpressionResult{Expression: "test operation setup:"}
+	opsResult := &exporter.OperationResult{
+		Status:      false,
+		Expressions: []*exporter.ExpressionResult{eexp},
+	}
+
+	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
+	if err != nil {
+		return opsResult, err
+	}
+
+	raw := new(bytes.Buffer)
+	templ := template.Must(template.New("").Parse(tpl.Data))
+	err = templ.Execute(raw, ops.TemplateValues)
+	if err != nil {
+		return opsResult, err
+	}
+
+	objects, err := client.GetUnstructuredFromYAML(raw.String())
+	if err != nil {
+		return opsResult, err
+	}
+
+	resp := ctrl.Client.Delete(context.TODO(), objects)
 	opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 
 	return opsResult, err
