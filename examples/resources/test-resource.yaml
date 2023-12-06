@@ -1,5 +1,5 @@
 apiVersion: kubetest.io/v1beta1
-kind: TestTemplate
+kind: Template
 metadata:
   name: namespace
 spec:
