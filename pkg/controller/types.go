@@ -8,7 +8,7 @@ import (
 )
 
 type Controller interface {
-	Exec() (*exporter.Report, error)
+	SingleRun() (*exporter.Report, error)
 }
 
 type KubeController struct {

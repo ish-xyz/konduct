@@ -17,7 +17,7 @@ func NewController(ldr loader.Loader, cl client.Client) Controller {
 	}
 }
 
-func (ctrl *KubeController) Exec() (*exporter.Report, error) {
+func (ctrl *KubeController) SingleRun() (*exporter.Report, error) {
 
 	report := exporter.NewReport()
 
