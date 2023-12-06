@@ -1,14 +1,20 @@
 package loader
 
+import "github.com/ish-xyz/ykubetest/pkg/client"
+
 type FSloader struct {
 	TestsFolder     string
 	TemplatesFolder string
 }
 
+type KubeLoader struct {
+	Client client.Client
+}
+
 type Loader interface {
 	ListTestCases() ([]string, error)
-	LoadTestCase(fname string) (*TestCase, error)
-	LoadTemplate(fname string) (*TestTemplate, error)
+	LoadTestCase(string) (*TestCase, error)
+	LoadTemplate(string) (*TestTemplate, error)
 }
 
 type TestTemplate struct {

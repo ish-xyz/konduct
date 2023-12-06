@@ -9,11 +9,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewController(ldr loader.Loader, cl client.Client) Controller {
+func NewController(ldr loader.Loader, cl client.Client, exp exporter.Exporter, intr int64) Controller {
 	return &KubeController{
-		Loader: ldr,
-		Client: cl,
-		logger: logrus.New().WithField("name", "kube-controller"),
+		Loader:   ldr,
+		Client:   cl,
+		Exporter: exp,
+		interval: intr,
+		logger:   logrus.New().WithField("name", "kube-controller"),
 	}
 }
 
@@ -67,4 +69,12 @@ func (ctrl *KubeController) SingleRun() (*exporter.Report, error) {
 	}
 
 	return report, nil
+}
+
+func (ctrl *KubeController) Run() error {
+	// TODO: add loop for controller
+	report, err := ctrl.SingleRun()
+	ctrl.Exporter.Export(report)
+
+	return err
 }

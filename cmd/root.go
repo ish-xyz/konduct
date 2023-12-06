@@ -20,9 +20,9 @@ var (
 	debug          bool
 	controllerMode bool
 	interval       int64
-	exporterType   string
-	kubeconfig     string
-	sourceDir      string
+	//exporterType   string
+	kubeconfig string
+	sourceDir  string
 
 	rootCmd = cobra.Command{
 		Long: "A controller and CLI to run e2e tests on Kubernetes",
@@ -35,7 +35,7 @@ func init() {
 	rootCmd.Flags().StringP("kube-config", "k", "~/.kube/config", "path to the kubeconfig file, if empty uses in-cluster method")
 	rootCmd.Flags().StringP("source-dir", "s", "", "Filesystem path to test cases, if empty will load tests cases from the Kubernetes API")
 	//rootCmd.Flags().StringP("tags", "t", "", "Run tests associated with specific tags")
-	rootCmd.Flags().StringP("exporter", "e", "text-file", "Define exporter: prometheus, pushgateway, json-file, text-file")
+	//rootCmd.Flags().StringP("exporter", "e", "stdout", "Define exporter: stdout, prometheus, pushgateway, json-file, text-file")
 	rootCmd.Flags().Int64P("interval", "i", 30, "In controller mode, this settings defines the interval between one test run and the other")
 	rootCmd.Flags().BoolP("debug", "d", false, "Run program in debug mode")
 	rootCmd.Flags().BoolP("controller", "c", false, "Run program in controller mode")
@@ -46,8 +46,8 @@ func init() {
 	sourceDir, err = rootCmd.Flags().GetString("source-dir")
 	raiseErr(err)
 
-	exporterType, err = rootCmd.Flags().GetString("exporter")
-	raiseErr(err)
+	// exporterType, err = rootCmd.Flags().GetString("exporter")
+	// raiseErr(err)
 
 	interval, err = rootCmd.Flags().GetInt64("interval")
 	raiseErr(err)
@@ -103,11 +103,24 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.Fatalln(err)
 	}
 
-	// Start DI
+	// Init Kube Client
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
-	ldr := loader.NewLoader(sourceDir, templatesDir)
-	ctrl := controller.NewController(ldr, kubeclient)
+
+	// Init Loader
+	var ldr loader.Loader
+	if sourceDir != "" {
+		// load from filesystem
+		ldr = loader.NewFSLoader(sourceDir, templatesDir)
+	} else {
+		// load from kube api
+		ldr = loader.NewKubeLoader(kubeclient)
+	}
+
+	// Init Exporter
 	exp := exporter.NewStdoutExporter(debug)
+
+	// Init Controller
+	ctrl := controller.NewController(ldr, kubeclient, exp, interval)
 
 	// Execute
 	if controllerMode {

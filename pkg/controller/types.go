@@ -9,12 +9,14 @@ import (
 
 type Controller interface {
 	SingleRun() (*exporter.Report, error)
+	Run() error
 }
 
 type KubeController struct {
 	Loader   loader.Loader
 	Client   client.Client
 	Exporter exporter.Exporter
+	interval int64
 	logger   *logrus.Entry
 }
 

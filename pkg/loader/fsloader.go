@@ -12,7 +12,7 @@ const (
 	TEMPLATE_FOLDER = "templates"
 )
 
-func NewLoader(testsFolder, templatesFolder string) Loader {
+func NewFSLoader(testsFolder, templatesFolder string) Loader {
 	return &FSloader{
 		TestsFolder:     testsFolder,
 		TemplatesFolder: templatesFolder,
