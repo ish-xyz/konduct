@@ -1,39 +1,23 @@
 name: test-case-1
 operations:
-  - action: apply
-    template: template-1
-    # retries: 10
-    # timeout: 10s
-    templateValues:
-      namespace: default
-      name: pod-name
-    assert: |
-      data.error == "";
-      len(data.error) == 0;
+  # - action: apply
+  #   template: template-1
+  #   templateValues:
+  #     namespace: default
+  #     name: pod-name
+  #   assert: |
+  #     data.error == "";
+  #     len(data.error) == 0;
 
   - action: get
     apiVersion: v1
     kind: Pod
     namespace: default
     name: pod-namesss
+    retry: 10
     labelSelector: ""
     assert: |
-      data.error;
-
-  # len(data.objects) == 1;
-  # data.objects[0]["metadata"]["name"] == "pod-name";
-  # data.error == "";
-
-  # - action: get
-  #   apiVersion: v1
-  #   kind: Pod
-  #   namespace: default
-  #   name: pod-name
-  #   labelSelector: ""
-  #   assert: |
-  #     len(data.objects) == 1;
-  #     data.objects[0]["metadata"]["name"] == "pod-name";
-  #     data.error == "";
+      data.error == "";
 
   # - action: delete
   #   template: template-1
@@ -42,21 +26,7 @@ operations:
   #     name: pod-name
   #   assert: |
   #     data.error == "";
-
-
-  # - action: get
-  #   apiVersion: v1
-  #   kind: Pod
-  #   namespace: default
-  #   name: po
-  #   labelSelector: ""
-  #   assert: |
-  #     Input.Objects
-
-  # - action: exec
-  #   name: pod
-  #   namespace: default
-  #   command: ["nslookup diffUrl"]
-  #   assert: |
-  #     Data.Message == "192.168.0.1"
-
+  #     len(data.error) == 0;
+  # len(data.objects) == 1;
+  # data.objects[0]["metadata"]["name"] == "pod-name";
+  # data.error == "";

@@ -3,13 +3,16 @@ package controller
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/antonmedv/expr"
 	"github.com/ish-xyz/ykubetest/pkg/client"
 	"github.com/ish-xyz/ykubetest/pkg/exporter"
 	"github.com/ish-xyz/ykubetest/pkg/loader"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -61,7 +64,7 @@ func runAssertions(code string, resp *client.Response) ([]*exporter.ExpressionRe
 
 		singleExprResult.Output = output
 		if output == false {
-			return expressionResults, err
+			return expressionResults, fmt.Errorf("-") //NOTE: sending an empty error to set the test result to false
 		}
 	}
 
@@ -77,7 +80,18 @@ func (ctrl *KubeController) get(ops *loader.TestOperation) (*exporter.OperationR
 		Expressions: make([]*exporter.ExpressionResult, 0),
 	}
 	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
-	opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+
+	for ops.Retry > 0 {
+
+		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+		if err == nil {
+			break
+		}
+		logrus.Infoln("retrying operation", ops.Action, "...")
+
+		time.Sleep(2 * time.Second)
+		ops.Retry--
+	}
 
 	return opsResult, err
 }

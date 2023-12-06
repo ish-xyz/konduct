@@ -46,4 +46,6 @@ type TestOperation struct {
 	// Global
 	Assert string `yaml:"assert"`
 	Action string `yaml:"action"`
+	Retry  int    `yaml:"retry"`
+	Wait   int    `yaml:"wait"`
 }

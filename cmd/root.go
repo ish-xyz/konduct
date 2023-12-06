@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -155,7 +154,6 @@ func run(cmd *cobra.Command, args []string) {
 	} else {
 		// load from kube api
 		logrus.Fatalln("CRDs are not implemented yet")
-		fmt.Println("here")
 		ldr, err = loader.NewKubeLoader(kubeclient)
 	}
 	checkError(err)
