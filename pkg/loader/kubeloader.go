@@ -2,10 +2,10 @@ package loader
 
 import "github.com/ish-xyz/ykubetest/pkg/client"
 
-func NewKubeLoader(cl client.Client) Loader {
+func NewKubeLoader(cl client.Client) (Loader, error) {
 	return &KubeLoader{
 		Client: cl,
-	}
+	}, nil
 }
 
 func (ldr *KubeLoader) ListTestCases() ([]string, error) {

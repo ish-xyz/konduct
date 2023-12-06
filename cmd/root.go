@@ -21,8 +21,9 @@ var (
 	controllerMode bool
 	interval       int64
 	//exporterType   string
-	kubeconfig string
-	sourceDir  string
+	kubeconfig   string
+	sourceDir    string
+	templatesDir string
 
 	rootCmd = cobra.Command{
 		Long: "A controller and CLI to run e2e tests on Kubernetes",
@@ -41,26 +42,26 @@ func init() {
 	rootCmd.Flags().BoolP("controller", "c", false, "Run program in controller mode")
 
 	kubeconfig, err = rootCmd.Flags().GetString("kube-config")
-	raiseErr(err)
+	checkError(err)
 
 	sourceDir, err = rootCmd.Flags().GetString("source-dir")
-	raiseErr(err)
+	checkError(err)
 
 	// exporterType, err = rootCmd.Flags().GetString("exporter")
-	// raiseErr(err)
+	// checkError(err)
 
 	interval, err = rootCmd.Flags().GetInt64("interval")
-	raiseErr(err)
+	checkError(err)
 
 	debug, err = rootCmd.Flags().GetBool("debug")
-	raiseErr(err)
+	checkError(err)
 
 	controllerMode, err = rootCmd.Flags().GetBool("controller")
-	raiseErr(err)
+	checkError(err)
 
 }
 
-func raiseErr(err error) {
+func checkError(err error) {
 	if err != nil {
 		logrus.Fatalln(err)
 	}
@@ -72,38 +73,20 @@ func Execute() {
 
 func run(cmd *cobra.Command, args []string) {
 
-	var restConfig *rest.Config
 	var err error
-	var templatesDir string
-	var report *exporter.Report
 
 	// Run in debug mode
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	if sourceDir != "" {
-		templatesDir = fmt.Sprintf("%s/%s", sourceDir, "templates")
-	}
-
-	// Load kubeconfig
-	if kubeconfig == "" {
-		restConfig, err = rest.InClusterConfig()
-	} else {
-		restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-	}
-	raiseErr(err)
-
-	// Allocate clients
-	dynclient, err := dynamic.NewForConfig(restConfig)
-	raiseErr(err)
-
-	clientset, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		logrus.Fatalln(err)
-	}
+	restConfig, err := getRestConfig(kubeconfig)
+	checkError(err)
 
 	// Init Kube Client
+	clientset, dynclient, err := getClients(restConfig)
+	checkError(err)
+
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
 
 	// Init Tests Loader
@@ -113,9 +96,11 @@ func run(cmd *cobra.Command, args []string) {
 		ldr, err = loader.NewFSLoader(sourceDir, templatesDir)
 	} else {
 		// load from kube api
-		ldr = loader.NewKubeLoader(kubeclient)
+		logrus.Fatalln("CRDs are not implemented yet")
+		fmt.Println("here")
+		ldr, err = loader.NewKubeLoader(kubeclient)
 	}
-	raiseErr(err)
+	checkError(err)
 
 	// Init Exporter
 	exp := exporter.NewStdoutExporter(debug)
@@ -125,10 +110,38 @@ func run(cmd *cobra.Command, args []string) {
 
 	// Execute
 	if controllerMode {
-		logrus.Fatalln("mode not implemented yet")
+		logrus.Fatalln("controller mode is not implemented yet")
 	} else {
 		err = ctrl.Run()
 	}
 
-	raiseErr(err)
+	checkError(err)
+}
+
+func getRestConfig(kubeconfig string) (*rest.Config, error) {
+	var restConfig *rest.Config
+	// Load kubeconfig
+	if kubeconfig == "" {
+		restConfig, err = rest.InClusterConfig()
+	} else {
+		restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+	}
+	return restConfig, err
+}
+
+func getClients(restConfig *rest.Config) (*kubernetes.Clientset, *dynamic.DynamicClient, error) {
+	// Allocate clients
+	dc, errx := dynamic.NewForConfig(restConfig)
+
+	cs, erry := kubernetes.NewForConfig(restConfig)
+
+	if errx != nil {
+		return nil, nil, errx
+	}
+
+	if erry != nil {
+		return nil, nil, erry
+	}
+
+	return cs, dc, nil
 }
