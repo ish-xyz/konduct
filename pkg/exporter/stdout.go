@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+func NewStdoutExporter(printall bool) Exporter {
+	return &StdoutExporter{
+		PrintAll: printall,
+	}
+}
+
 func (e *StdoutExporter) Export(r *Report) error {
 
 	if r.Status {

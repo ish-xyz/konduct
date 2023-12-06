@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ghodss/yaml"
 )
@@ -12,11 +13,18 @@ const (
 	TEMPLATE_FOLDER = "templates"
 )
 
-func NewFSLoader(testsFolder, templatesFolder string) Loader {
+func NewFSLoader(testsFolder, templatesFolder string) (Loader, error) {
+	if testsFolder == "" {
+		return nil, fmt.Errorf("you must define a source folder for your tests")
+	}
+	if templatesFolder == "" {
+		templatesFolder = fmt.Sprintf("%s/%s", strings.TrimRight(testsFolder, "/"), "templates")
+	}
+
 	return &FSloader{
 		TestsFolder:     testsFolder,
 		TemplatesFolder: templatesFolder,
-	}
+	}, nil
 }
 
 func (ldr *FSloader) ListTestCases() ([]string, error) {

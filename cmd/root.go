@@ -34,7 +34,7 @@ func init() {
 
 	rootCmd.Flags().StringP("kube-config", "k", "~/.kube/config", "path to the kubeconfig file, if empty uses in-cluster method")
 	rootCmd.Flags().StringP("source-dir", "s", "", "Filesystem path to test cases, if empty will load tests cases from the Kubernetes API")
-	//rootCmd.Flags().StringP("tags", "t", "", "Run tests associated with specific tags")
+	//rootCmd.Flags().StringP("labels", "l", "", "Run tests associated with specific labels")
 	//rootCmd.Flags().StringP("exporter", "e", "stdout", "Define exporter: stdout, prometheus, pushgateway, json-file, text-file")
 	rootCmd.Flags().Int64P("interval", "i", 30, "In controller mode, this settings defines the interval between one test run and the other")
 	rootCmd.Flags().BoolP("debug", "d", false, "Run program in debug mode")
@@ -106,15 +106,16 @@ func run(cmd *cobra.Command, args []string) {
 	// Init Kube Client
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
 
-	// Init Loader
+	// Init Tests Loader
 	var ldr loader.Loader
 	if sourceDir != "" {
 		// load from filesystem
-		ldr = loader.NewFSLoader(sourceDir, templatesDir)
+		ldr, err = loader.NewFSLoader(sourceDir, templatesDir)
 	} else {
 		// load from kube api
 		ldr = loader.NewKubeLoader(kubeclient)
 	}
+	raiseErr(err)
 
 	// Init Exporter
 	exp := exporter.NewStdoutExporter(debug)
@@ -124,10 +125,9 @@ func run(cmd *cobra.Command, args []string) {
 
 	// Execute
 	if controllerMode {
-		logrus.Warningln("mode not implemented yet")
+		logrus.Fatalln("mode not implemented yet")
 	} else {
-		report, err = ctrl.SingleRun()
-		exp.Export(report)
+		err = ctrl.Run()
 	}
 
 	raiseErr(err)
