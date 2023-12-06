@@ -29,7 +29,7 @@ func (or *OperationResult) Str(printAll bool) string {
 	msg := ""
 	for _, expr := range or.Expressions {
 		if expr.Output == false || printAll {
-			msg = fmt.Sprintf("%s\n	* %s %v", msg, expr.Expression, expr.Output)
+			msg = fmt.Sprintf("%s\n	* %s -> %v", msg, expr.Expression, expr.Output)
 		}
 	}
 	return msg

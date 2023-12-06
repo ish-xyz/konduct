@@ -1,7 +1,7 @@
 name: test-case-1
 operations:
   - action: apply
-    template: template-1gg
+    template: template-1
     # retries: 10
     # timeout: 10s
     templateValues:
@@ -9,6 +9,7 @@ operations:
       name: pod-name
     assert: |
       data.error == "";
+      len(data.error) == 0;
 
   - action: get
     apiVersion: v1
@@ -18,6 +19,7 @@ operations:
     labelSelector: ""
     assert: |
       data.error;
+
   # len(data.objects) == 1;
   # data.objects[0]["metadata"]["name"] == "pod-name";
   # data.error == "";

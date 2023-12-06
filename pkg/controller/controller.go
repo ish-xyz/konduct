@@ -19,7 +19,7 @@ func NewController(ldr loader.Loader, cl client.Client, exp exporter.Exporter, i
 	}
 }
 
-func (ctrl *KubeController) SingleRun() (*exporter.Report, error) {
+func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 
 	report := exporter.NewReport()
 
@@ -59,10 +59,15 @@ func (ctrl *KubeController) SingleRun() (*exporter.Report, error) {
 			}
 
 			if err != nil && len(opresult.Expressions) > 0 {
-				opresult.Expressions[len(opresult.Expressions)-1].Output = fmt.Sprintf("%v", err)
+				opresult.Expressions[len(opresult.Expressions)-1].Expression = fmt.Sprintf(
+					"%s >> %v",
+					opresult.Expressions[len(opresult.Expressions)-1].Expression,
+					err,
+				)
+				opresult.Expressions[len(opresult.Expressions)-1].Output = false
 			}
 			opresult.Status = (err == nil)
-			testResult.Set(opresult.Status, opresult.Str(true))
+			testResult.Set(opresult.Status, opresult.Str(verbose))
 		}
 
 		report.Add(testResult)
@@ -71,9 +76,9 @@ func (ctrl *KubeController) SingleRun() (*exporter.Report, error) {
 	return report, nil
 }
 
-func (ctrl *KubeController) Run() error {
+func (ctrl *KubeController) Run(verbose bool) error {
 	// TODO: add loop for controller
-	report, err := ctrl.SingleRun()
+	report, err := ctrl.singleRun(verbose)
 	ctrl.Exporter.Export(report)
 
 	return err

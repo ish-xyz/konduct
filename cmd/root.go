@@ -82,58 +82,6 @@ func parseFlags(cmd *cobra.Command) error {
 	return nil
 }
 
-func run(cmd *cobra.Command, args []string) {
-
-	err := parseFlags(cmd)
-	checkError(err)
-
-	// Run in debug mode
-	if debug {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	fmt.Println(kubeconfig, testsDir)
-
-	kubeconfig = expand(kubeconfig)
-
-	restConfig, err := getRestConfig(kubeconfig)
-	checkError(err)
-
-	// Init Kube Client
-	clientset, dynclient, err := getClients(restConfig)
-	checkError(err)
-
-	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
-
-	// Init Tests Loader
-	var ldr loader.Loader
-	if testsDir != "" {
-		// load from filesystem
-		ldr, err = loader.NewFSLoader(testsDir, "")
-	} else {
-		// load from kube api
-		logrus.Fatalln("CRDs are not implemented yet")
-		fmt.Println("here")
-		ldr, err = loader.NewKubeLoader(kubeclient)
-	}
-	checkError(err)
-
-	// Init Exporter
-	exp := exporter.NewStdoutExporter(debug)
-
-	// Init Controller
-	ctrl := controller.NewController(ldr, kubeclient, exp, interval)
-
-	// Execute
-	if controllerMode {
-		logrus.Fatalln("controller mode is not implemented yet")
-	} else {
-		err = ctrl.Run()
-	}
-
-	checkError(err)
-}
-
 func getRestConfig(kubeconfig string) (*rest.Config, error) {
 	var restConfig *rest.Config
 	// Load kubeconfig
@@ -178,4 +126,52 @@ func checkError(err error) {
 	if err != nil {
 		logrus.Fatalln(err)
 	}
+}
+
+func run(cmd *cobra.Command, args []string) {
+
+	err := parseFlags(cmd)
+	checkError(err)
+
+	// Run in debug mode
+	if debug {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
+	restConfig, err := getRestConfig(expand(kubeconfig))
+	checkError(err)
+
+	// Init Kube Client
+	clientset, dynclient, err := getClients(restConfig)
+	checkError(err)
+
+	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
+
+	// Init Tests Loader
+	var ldr loader.Loader
+	if testsDir != "" {
+		// load from filesystem
+		ldr, err = loader.NewFSLoader(testsDir, "")
+	} else {
+		// load from kube api
+		logrus.Fatalln("CRDs are not implemented yet")
+		fmt.Println("here")
+		ldr, err = loader.NewKubeLoader(kubeclient)
+	}
+	checkError(err)
+
+	// Init Exporter
+	exp := exporter.NewStdoutExporter(debug)
+
+	// Init Controller
+	ctrl := controller.NewController(ldr, kubeclient, exp, interval)
+
+	// Execute
+	if controllerMode {
+		logrus.Fatalln("controller mode is not implemented yet")
+	} else {
+		err = ctrl.Run(debug)
+	}
+
+	checkError(err)
 }

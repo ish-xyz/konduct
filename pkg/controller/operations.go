@@ -84,7 +84,7 @@ func (ctrl *KubeController) get(ops *loader.TestOperation) (*exporter.OperationR
 
 func (ctrl *KubeController) apply(ops *loader.TestOperation) (*exporter.OperationResult, error) {
 
-	eexp := &exporter.ExpressionResult{Expression: "test operation setup:"}
+	eexp := &exporter.ExpressionResult{Expression: "test operation setup"}
 	opsResult := &exporter.OperationResult{
 		Status:      false,
 		Expressions: []*exporter.ExpressionResult{eexp},
@@ -115,7 +115,7 @@ func (ctrl *KubeController) apply(ops *loader.TestOperation) (*exporter.Operatio
 
 func (ctrl *KubeController) delete(ops *loader.TestOperation) (*exporter.OperationResult, error) {
 
-	eexp := &exporter.ExpressionResult{Expression: "test operation setup:"}
+	eexp := &exporter.ExpressionResult{Expression: "test operation setup"}
 	opsResult := &exporter.OperationResult{
 		Status:      false,
 		Expressions: []*exporter.ExpressionResult{eexp},
