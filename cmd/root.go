@@ -5,6 +5,7 @@ import (
 
 	"github.com/ish-xyz/ykubetest/pkg/client"
 	"github.com/ish-xyz/ykubetest/pkg/controller"
+	"github.com/ish-xyz/ykubetest/pkg/exporter"
 	"github.com/ish-xyz/ykubetest/pkg/loader"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -19,7 +20,7 @@ var (
 	debug          bool
 	controllerMode bool
 	interval       int64
-	exporter       string
+	exporterType   string
 	kubeconfig     string
 	sourceDir      string
 
@@ -40,7 +41,7 @@ func init() {
 
 	kubeconfig, err = rootCmd.Flags().GetString("kube-config")
 	sourceDir, err = rootCmd.Flags().GetString("source-dir")
-	exporter, err = rootCmd.Flags().GetString("exporter")
+	exporterType, err = rootCmd.Flags().GetString("exporter")
 	interval, err = rootCmd.Flags().GetInt64("interval")
 	debug, err = rootCmd.Flags().GetBool("debug")
 	controllerMode, err = rootCmd.Flags().GetBool("controller")

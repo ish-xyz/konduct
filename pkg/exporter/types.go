@@ -1,5 +1,18 @@
 package exporter
 
+// Exporters
+type PrometheusExporter struct {
+	// pushgateway or metrics
+	Mode    string
+	Port    int
+	Address string
+}
+type FileExporter struct {
+	// json or text
+	Mode string
+	Path string
+}
+
 // OperationResult functions
 type OperationResult struct {
 	Status      bool
