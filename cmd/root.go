@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os/user"
+	"path/filepath"
+	"strings"
 
 	"github.com/ish-xyz/ykubetest/pkg/client"
 	"github.com/ish-xyz/ykubetest/pkg/controller"
@@ -42,6 +45,7 @@ func init() {
 	rootCmd.Flags().BoolP("controller", "c", false, "Run program in controller mode")
 
 	kubeconfig, err = rootCmd.Flags().GetString("kube-config")
+
 	checkError(err)
 
 	sourceDir, err = rootCmd.Flags().GetString("source-dir")
@@ -59,6 +63,17 @@ func init() {
 	controllerMode, err = rootCmd.Flags().GetBool("controller")
 	checkError(err)
 
+}
+func expand(path string) string {
+	if strings.HasPrefix(path, "~/") {
+		usr, _ := user.Current()
+		dir := usr.HomeDir
+		// Use strings.HasPrefix so we don't match paths like
+		// "/something/~/something/"
+		path = filepath.Join(dir, path[2:])
+	}
+
+	return path
 }
 
 func checkError(err error) {
@@ -79,6 +94,8 @@ func run(cmd *cobra.Command, args []string) {
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
+
+	kubeconfig = expand(kubeconfig)
 
 	restConfig, err := getRestConfig(kubeconfig)
 	checkError(err)
