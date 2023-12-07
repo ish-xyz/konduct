@@ -30,7 +30,6 @@ type Template struct {
 
 // TestCase definition used to run e2e tests
 type TestCase struct {
-	Name string `yaml:"name" json:"name"`
 
 	// +kubebuilder:validation:Required
 	Description string `yaml:"description" json:"description"`

@@ -41,7 +41,7 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 			continue
 		}
 
-		testResult.Name = testcase.Name
+		testResult.Name = tf
 
 		for i, op := range testcase.Operations {
 

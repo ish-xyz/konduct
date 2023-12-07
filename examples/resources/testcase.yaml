@@ -15,7 +15,7 @@ spec:
     apiVersion: v1
     kind: Pod
     namespace: default
-    name: pod-namesss
+    name: pod-name
     retry: 10
     wait: 10
     interval: 10

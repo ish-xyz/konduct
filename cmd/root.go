@@ -153,7 +153,6 @@ func run(cmd *cobra.Command, args []string) {
 		ldr, err = loader.NewFSLoader(testsDir, "")
 	} else {
 		// load from kube api
-		logrus.Fatalln("CRDs are not implemented yet")
 		ldr, err = loader.NewKubeLoader(kubeclient)
 	}
 	checkError(err)
