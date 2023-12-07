@@ -1,4 +1,4 @@
-module github.com/ish-xyz/ykubetest
+module github.com/ish-xyz/kubetest
 
 go 1.19
 

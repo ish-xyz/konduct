@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/ish-xyz/ykubetest/pkg/client"
-	"github.com/ish-xyz/ykubetest/pkg/exporter"
-	"github.com/ish-xyz/ykubetest/pkg/loader"
+	"github.com/ish-xyz/kubetest/pkg/client"
+	"github.com/ish-xyz/kubetest/pkg/exporter"
+	"github.com/ish-xyz/kubetest/pkg/loader"
 	"github.com/sirupsen/logrus"
 )
 

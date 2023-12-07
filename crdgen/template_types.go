@@ -1,7 +1,7 @@
 package crdgen
 
 import (
-	"github.com/ish-xyz/ykubetest/pkg/loader"
+	"github.com/ish-xyz/kubetest/pkg/loader"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
