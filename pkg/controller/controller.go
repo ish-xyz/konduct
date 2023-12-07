@@ -34,7 +34,7 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 		testResult := exporter.NewTestResult(tf)
 		testcase, err := ctrl.Loader.LoadTestCase(tf)
 		if err != nil {
-			ctrl.logger.Errorf("failed to load test file %s", tf)
+			ctrl.logger.Errorf("failed to load test file %s %v", tf, err)
 
 			testResult.Set(false, fmt.Sprintf("failed to load testcase in %s", tf))
 			report.Add(testResult)
@@ -99,7 +99,10 @@ func setDefaultTimes(tc *loader.TestCase, op *loader.TestOperation) {
 func (ctrl *KubeController) Run(verbose bool) error {
 	// TODO: add loop for controller
 	report, err := ctrl.singleRun(verbose)
-	ctrl.Exporter.Export(report)
+	if err != nil {
+		return err
+	}
 
+	ctrl.Exporter.Export(report)
 	return err
 }

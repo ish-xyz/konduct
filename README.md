@@ -8,7 +8,7 @@ Controller to run integration tests on Kubernetes
 * [...] create validation functions for TestCase, Operations and Template types
 * [] build exporter for prometheus (pushgateway)
 * [x] improve k8s dynamic client 
-* [...] implement exec operation
+* [x] implement exec operation
 * [] fix stderr in dynamic client (exec)
 * [x] define CRDs
 * [] build exporter for prometheus (http endpoint)

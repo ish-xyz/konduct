@@ -17,14 +17,20 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const (
+	EXPORTERS_REGEX = "(stdout|pushgateway)"
+)
+
 var (
 	err            error
 	debug          bool
 	controllerMode bool
 	interval       int64
-	//exporterType   string
-	kubeconfig string
-	testsDir   string
+	kubeconfig     string
+	testsDir       string
+
+	stdout      bool
+	pushgateway string
 
 	rootCmd = cobra.Command{
 		Long: "A controller and CLI to run e2e tests on Kubernetes",
@@ -37,14 +43,33 @@ func Execute() {
 }
 
 func init() {
+	// TODO: add label selectors
 
-	rootCmd.Flags().StringP("kube-config", "k", "~/.kube/config", "path to the kubeconfig file, if empty uses in-cluster method")
+	// Marked flags
+	rootCmd.Flags().StringP("kube-config", "k", "", "path to the kubeconfig file, if empty uses in-cluster method")
 	rootCmd.Flags().StringP("dir", "d", "", "Filesystem path to test cases, if empty will load test cases from the Kubernetes API")
-	//rootCmd.Flags().StringP("labels", "l", "", "Run tests associated with specific labels")
-	//rootCmd.Flags().StringP("exporter", "e", "stdout", "Define exporter: stdout, prometheus, pushgateway, json-file, text-file")
-	rootCmd.Flags().Int64P("interval", "i", 30, "In controller mode, this settings defines the interval between one test run and the other")
-	rootCmd.Flags().Bool("debug", false, "Run program in debug mode")
+	rootCmd.Flags().Int64P("interval", "i", -1, "In controller mode, this settings defines the interval between one test run and the other")
 	rootCmd.Flags().BoolP("controller", "c", false, "Run program in controller mode")
+	rootCmd.Flags().StringP("pushgateway", "g", "", "Define push gateway address")
+	rootCmd.Flags().Bool("stdout", false, "Print report to stdout")
+
+	// Optional flags
+	rootCmd.Flags().Bool("debug", false, "Run program in debug mode")
+
+	// MARKERS:
+
+	// can't define --kube-config and --dir together \
+	// AND you have to define at least one of them
+	rootCmd.MarkFlagsMutuallyExclusive("pushgateway", "stdout")
+	rootCmd.MarkFlagsOneRequired("pushgateway", "stdout")
+
+	// can't define --kube-config and --dir together \
+	// AND you have to define at least one of them
+	rootCmd.MarkFlagsMutuallyExclusive("kube-config", "dir")
+	rootCmd.MarkFlagsOneRequired("dir", "kube-config")
+
+	// if --controller is specific --interval should be too
+	rootCmd.MarkFlagsRequiredTogether("controller", "interval")
 
 }
 
@@ -60,9 +85,6 @@ func parseFlags(cmd *cobra.Command) error {
 		return err
 	}
 
-	// exporterType, err = rootCmd.Flags().GetString("exporter")
-	// checkError(err)
-
 	interval, err = cmd.Flags().GetInt64("interval")
 	if err != nil {
 		return err
@@ -74,6 +96,16 @@ func parseFlags(cmd *cobra.Command) error {
 	}
 
 	controllerMode, err = cmd.Flags().GetBool("controller")
+	if err != nil {
+		return err
+	}
+
+	pushgateway, err = cmd.Flags().GetString("pushgateway")
+	if err != nil {
+		return err
+	}
+
+	stdout, err = cmd.Flags().GetBool("stdout")
 	if err != nil {
 		return err
 	}
@@ -158,7 +190,7 @@ func run(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	// Init Exporter
-	exp := exporter.NewStdoutExporter(debug)
+	exp := getExporter(debug)
 
 	// Init Controller
 	ctrl := controller.NewController(ldr, kubeclient, exp, interval)
@@ -171,4 +203,14 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	checkError(err)
+}
+
+func getExporter(verbose bool) exporter.Exporter {
+	if stdout {
+		return exporter.NewStdoutExporter(verbose)
+	}
+
+	// TODO: validate address
+	return exporter.NewPrometheusExporter("pushgateway", pushgateway)
+
 }

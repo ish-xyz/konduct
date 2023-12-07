@@ -49,7 +49,7 @@ type TestOperation struct {
 
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
-	TemplateValues map[string]interface{} `yaml:"templateValues" json:"teamplateValues,omitempty"`
+	TemplateValues map[string]interface{} `yaml:"templateValues" json:"templateValues,omitempty"`
 
 	ApiVersion    string `yaml:"apiVersion" json:"apiVersion,omitempty"`
 	Kind          string `yaml:"kind" json:"kind,omitempty"`

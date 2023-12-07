@@ -77,14 +77,15 @@ func (ctrl *KubeController) get(opsId string, ops *loader.TestOperation) (*expor
 		Expressions: make([]*exporter.ExpressionResult, 0),
 	}
 
-	for ops.Retry > 0 {
+	for ops.Retry >= 0 {
+
+		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 		if err == nil {
 			break
 		}
-		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		ops.Retry--
 		time.Sleep(2 * time.Second)
@@ -118,14 +119,15 @@ func (ctrl *KubeController) apply(opsId string, ops *loader.TestOperation) (*exp
 		return opsResult, err
 	}
 
-	for ops.Retry > 0 {
+	for ops.Retry >= 0 {
+
+		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		resp := ctrl.Client.Apply(context.TODO(), objects)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 		if err == nil {
 			break
 		}
-		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		ops.Retry--
 		time.Sleep(2 * time.Second)
@@ -158,13 +160,15 @@ func (ctrl *KubeController) delete(opsId string, ops *loader.TestOperation) (*ex
 		return opsResult, err
 	}
 
-	for ops.Retry > 0 {
+	for ops.Retry >= 0 {
+
+		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
+
 		resp := ctrl.Client.Delete(context.TODO(), objects)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 		if err == nil {
 			break
 		}
-		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		ops.Retry--
 		time.Sleep(2 * time.Second)
@@ -180,14 +184,15 @@ func (ctrl *KubeController) exec(opsId string, ops *loader.TestOperation) (*expo
 		Expressions: make([]*exporter.ExpressionResult, 0),
 	}
 
-	for ops.Retry > 0 {
+	for ops.Retry >= 0 {
+
+		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		resp := ctrl.Client.Exec(context.TODO(), ops.Name, ops.Namespace, ops.Command)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 		if err == nil {
 			break
 		}
-		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		ops.Retry--
 		time.Sleep(2 * time.Second)

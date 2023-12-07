@@ -37,8 +37,6 @@ spec:
                 type: string
               interval:
                 type: integer
-              name:
-                type: string
               operations:
                 items:
                   properties:
@@ -48,6 +46,10 @@ spec:
                       type: string
                     assert:
                       type: string
+                    command:
+                      items:
+                        type: string
+                      type: array
                     interval:
                       type: integer
                     kind:
@@ -60,12 +62,12 @@ spec:
                       type: string
                     retry:
                       type: integer
-                    teamplateValues:
-                      x-kubernetes-preserve-unknown-fields: true
                     teardown:
                       type: boolean
                     template:
                       type: string
+                    templateValues:
+                      x-kubernetes-preserve-unknown-fields: true
                     wait:
                       type: integer
                   type: object
@@ -78,7 +80,6 @@ spec:
                 type: integer
             required:
             - description
-            - name
             - operations
             type: object
           status:
