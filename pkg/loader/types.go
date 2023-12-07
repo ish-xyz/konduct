@@ -17,11 +17,13 @@ type Loader interface {
 	LoadTemplate(string) (*TestTemplate, error)
 }
 
+// TODO: add Validate() method to struct
 type TestTemplate struct {
 	Name string `yaml:"name" json:"name"`
 	Data string `yaml:"data" json:"data"`
 }
 
+// TODO: add Validate() method to struct
 type TestCase struct {
 	Name string `yaml:"name" json:"name"`
 
