@@ -21,9 +21,6 @@ const (
 	DELETE_ACTION = "delete"
 	EXEC_ACTION   = "exec"
 	GET_ACTION    = "get"
-
-	// operators
-	REGEX_OPERATOR = "regex:"
 )
 
 func runAssertions(code string, resp *client.Response) ([]*exporter.ExpressionResult, error) {
@@ -172,5 +169,29 @@ func (ctrl *KubeController) delete(opsId string, ops *loader.TestOperation) (*ex
 		ops.Retry--
 		time.Sleep(2 * time.Second)
 	}
+	return opsResult, err
+}
+
+func (ctrl *KubeController) exec(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
+	var err error
+
+	opsResult := &exporter.OperationResult{
+		Status:      false,
+		Expressions: make([]*exporter.ExpressionResult, 0),
+	}
+
+	for ops.Retry > 0 {
+
+		resp := ctrl.Client.Exec(context.TODO(), ops.Name, ops.Namespace, ops.Command)
+		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+		if err == nil {
+			break
+		}
+		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
+
+		ops.Retry--
+		time.Sleep(2 * time.Second)
+	}
+
 	return opsResult, err
 }

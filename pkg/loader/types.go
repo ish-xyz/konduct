@@ -53,9 +53,11 @@ type TestOperation struct {
 
 	ApiVersion    string `yaml:"apiVersion" json:"apiVersion,omitempty"`
 	Kind          string `yaml:"kind" json:"kind,omitempty"`
-	Name          string `yaml:"name" json:"name,omitempty"`
-	Namespace     string `yaml:"namespace" json:"namespace,omitempty"`
 	LabelSelector string `yaml:"labelSelector" json:"labelSelector,omitempty"`
+
+	Name      string   `yaml:"name" json:"name,omitempty"`
+	Namespace string   `yaml:"namespace" json:"namespace,omitempty"`
+	Command   []string `yaml:"command" json:"command,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Assert string `yaml:"assert" json:"assert,omitempty"`

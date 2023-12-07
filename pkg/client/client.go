@@ -253,10 +253,15 @@ func (k *KubeClient) Delete(ctx context.Context, objects []*unstructured.Unstruc
 }
 
 // Pod exec method to run commands and fetch outputs (stdout/stderr)
-func (k *KubeClient) Exec(ctx context.Context, name string, namespace string, cmd []string) (string, error) {
+func (k *KubeClient) Exec(ctx context.Context, name string, namespace string, cmd []string) *Response {
 
 	var stdoutBuff bytes.Buffer
 	var stderrBuff bytes.Buffer
+	var resp = &Response{
+		Error:   "",
+		Objects: nil,
+		Output:  "",
+	}
 
 	stdout := bufio.NewWriter(&stdoutBuff)
 	stderr := bufio.NewWriter(&stderrBuff)
@@ -275,7 +280,8 @@ func (k *KubeClient) Exec(ctx context.Context, name string, namespace string, cm
 	)
 	exec, err := remotecommand.NewSPDYExecutor(k.Config, "POST", req.URL())
 	if err != nil {
-		return "", err
+		resp.Error = fmt.Sprintf("%v", err)
+		return resp
 	}
 
 	err = exec.StreamWithContext(context.TODO(), remotecommand.StreamOptions{
@@ -284,11 +290,12 @@ func (k *KubeClient) Exec(ctx context.Context, name string, namespace string, cm
 		Stderr: stderr,
 	})
 	if err != nil {
-		return "", err
+		resp.Error = fmt.Sprintf("%v", err)
+		return resp
 	}
 
-	fmt.Println(stdoutBuff.String())
-	fmt.Println(stderrBuff.String())
+	resp.Output = stdoutBuff.String()
+	resp.Error = stderrBuff.String()
 
-	return "", nil
+	return resp
 }
