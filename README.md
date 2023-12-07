@@ -9,7 +9,7 @@ Controller to run integration tests on Kubernetes
 * [] improve k8s dynamic client 
 * [] implement exec operation
 * [] fix stderr in dynamic client (exec)
-* [] define CRDs
+* [x] define CRDs
 * [] build exporter for prometheus (http endpoint)
 * [] build API to trigger tests on demand
 * [] build JSON exporter
