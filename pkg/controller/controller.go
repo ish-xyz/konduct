@@ -43,16 +43,18 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 
 		testResult.Name = testcase.Name
 
-		for _, op := range testcase.Operations {
+		for i, op := range testcase.Operations {
+
+			opsId := fmt.Sprintf("id-%d", i)
 
 			var opresult = exporter.NewOperationResult()
 
 			if op.Action == GET_ACTION {
-				opresult, err = ctrl.get(op)
+				opresult, err = ctrl.get(opsId, op)
 			} else if op.Action == APPLY_ACTION {
-				opresult, err = ctrl.apply(op)
+				opresult, err = ctrl.apply(opsId, op)
 			} else if op.Action == DELETE_ACTION {
-				opresult, err = ctrl.delete(op)
+				opresult, err = ctrl.delete(opsId, op)
 			} else {
 				err = fmt.Errorf("unkown action '%s'", op.Action)
 				opresult.Expressions = append(opresult.Expressions, &exporter.ExpressionResult{Expression: ""})
@@ -60,7 +62,7 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 
 			if err != nil && len(opresult.Expressions) > 0 {
 				opresult.Expressions[len(opresult.Expressions)-1].Expression = fmt.Sprintf(
-					"%s >> %v",
+					"%s %v",
 					opresult.Expressions[len(opresult.Expressions)-1].Expression,
 					err,
 				)

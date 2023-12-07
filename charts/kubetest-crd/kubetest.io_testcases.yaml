@@ -1,0 +1,107 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: testcases.kubetest.io
+spec:
+  group: kubetest.io
+  names:
+    kind: TestCase
+    listKind: TestCaseList
+    plural: testcases
+    singular: testcase
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              defaultRetries:
+                type: integer
+              defaultTimeout:
+                type: string
+              description:
+                type: string
+              name:
+                type: string
+              operations:
+                items:
+                  properties:
+                    action:
+                      type: string
+                    apiVersion:
+                      description: Get
+                      type: string
+                    assert:
+                      description: Global
+                      type: string
+                    interval:
+                      type: integer
+                    kind:
+                      type: string
+                    labelSelector:
+                      type: string
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                    retry:
+                      description: Global Optional
+                      type: integer
+                    teamplateValues:
+                      additionalProperties:
+                        type: boolean
+                      type: object
+                    teardown:
+                      description: Apply/Delete
+                      type: boolean
+                    template:
+                      type: string
+                    wait:
+                      type: integer
+                  required:
+                  - action
+                  - apiVersion
+                  - assert
+                  - interval
+                  - kind
+                  - labelSelector
+                  - name
+                  - namespace
+                  - retry
+                  - teamplateValues
+                  - teardown
+                  - template
+                  - wait
+                  type: object
+                maxItems: 500
+                minItems: 1
+                type: array
+            required:
+            - defaultRetries
+            - defaultTimeout
+            - description
+            - name
+            - operations
+            type: object
+          status:
+            type: object
+        type: object
+    served: true
+    storage: true

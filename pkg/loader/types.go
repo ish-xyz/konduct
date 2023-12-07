@@ -18,34 +18,47 @@ type Loader interface {
 }
 
 type TestTemplate struct {
-	Name string `yaml:"name"`
-	Data string `yaml:"data"`
+	Name string `yaml:"name" json:"name"`
+	Data string `yaml:"data" json:"data"`
 }
 
 type TestCase struct {
-	Name           string           `yaml:"name"`
-	DefaultTimeout string           `yaml:"defaultTimeout"`
-	DefaultRetries int              `yaml:"defaultRetries"`
-	Operations     []*TestOperation `yaml:"operations"`
+	Name string `yaml:"name" json:"name"`
+
+	// +kubebuilder:validation:Required
+	Description string `yaml:"description" json:"description"`
+
+	// +kubebuilder:validation:MaxItems=500
+	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:Required
+	Operations []*TestOperation `yaml:"operations" json:"operations"`
+
+	DefaultTimeout string `yaml:"defaultTimeout" json:"defaultTimeout"`
+	DefaultRetries int    `yaml:"defaultRetries" json:"defaultRetries"`
 }
 
 type TestOperation struct {
 
-	// Setup
-	Teardown       bool                   `yaml:"teardown,omitempty"`
-	Template       string                 `yaml:"template,omitempty"`
-	TemplateValues map[string]interface{} `yaml:"templateValues,omitempty"`
+	// Apply/Delete
+	Teardown       bool            `yaml:"teardown" json:"teardown"`
+	Template       string          `yaml:"template" json:"template"`
+	TemplateValues map[string]bool `yaml:"templateValues" json:"teamplateValues"`
 
 	// Get
-	ApiVersion    string `yaml:"apiVersion,omitempty"`
-	Kind          string `yaml:"kind,omitempty"`
-	Name          string `yaml:"name,omitempty"`
-	Namespace     string `yaml:"namespace,omitempty"`
-	LabelSelector string `yaml:"labelSelector,omitempty"`
+	ApiVersion    string `yaml:"apiVersion" json:"apiVersion"`
+	Kind          string `yaml:"kind" json:"kind"`
+	Name          string `yaml:"name" json:"name"`
+	Namespace     string `yaml:"namespace" json:"namespace"`
+	LabelSelector string `yaml:"labelSelector" json:"labelSelector"`
 
 	// Global
-	Assert string `yaml:"assert"`
-	Action string `yaml:"action"`
-	Retry  int    `yaml:"retry"`
-	Wait   int    `yaml:"wait"`
+	// +kubebuilder:validation:Required
+	Assert string `yaml:"assert" json:"assert"`
+	// +kubebuilder:validation:Required
+	Action string `yaml:"action" json:"action"`
+
+	// Global Optional
+	Retry    int `yaml:"retry" json:"retry"`
+	Interval int `yaml:"interval" json:"interval"`
+	Wait     int `yaml:"wait" json:"wait"`
 }

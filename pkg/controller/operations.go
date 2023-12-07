@@ -71,7 +71,7 @@ func runAssertions(code string, resp *client.Response) ([]*exporter.ExpressionRe
 	return expressionResults, nil
 }
 
-func (ctrl *KubeController) get(ops *loader.TestOperation) (*exporter.OperationResult, error) {
+func (ctrl *KubeController) get(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
 
 	var err error
 
@@ -79,26 +79,26 @@ func (ctrl *KubeController) get(ops *loader.TestOperation) (*exporter.OperationR
 		Status:      false,
 		Expressions: make([]*exporter.ExpressionResult, 0),
 	}
-	resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
 
 	for ops.Retry > 0 {
 
+		resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
 		if err == nil {
 			break
 		}
-		logrus.Infoln("retrying operation", ops.Action, "...")
+		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
 
-		time.Sleep(2 * time.Second)
 		ops.Retry--
+		time.Sleep(2 * time.Second)
 	}
 
 	return opsResult, err
 }
 
-func (ctrl *KubeController) apply(ops *loader.TestOperation) (*exporter.OperationResult, error) {
+func (ctrl *KubeController) apply(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
 
-	eexp := &exporter.ExpressionResult{Expression: "test operation setup"}
+	eexp := &exporter.ExpressionResult{Expression: ">> test operation setup"}
 	opsResult := &exporter.OperationResult{
 		Status:      false,
 		Expressions: []*exporter.ExpressionResult{eexp},
@@ -121,15 +121,24 @@ func (ctrl *KubeController) apply(ops *loader.TestOperation) (*exporter.Operatio
 		return opsResult, err
 	}
 
-	resp := ctrl.Client.Apply(context.TODO(), objects)
-	opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+	for ops.Retry > 0 {
 
+		resp := ctrl.Client.Apply(context.TODO(), objects)
+		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+		if err == nil {
+			break
+		}
+		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
+
+		ops.Retry--
+		time.Sleep(2 * time.Second)
+	}
 	return opsResult, err
 }
 
-func (ctrl *KubeController) delete(ops *loader.TestOperation) (*exporter.OperationResult, error) {
+func (ctrl *KubeController) delete(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
 
-	eexp := &exporter.ExpressionResult{Expression: "test operation setup"}
+	eexp := &exporter.ExpressionResult{Expression: ">> test operation setup"}
 	opsResult := &exporter.OperationResult{
 		Status:      false,
 		Expressions: []*exporter.ExpressionResult{eexp},
@@ -152,47 +161,16 @@ func (ctrl *KubeController) delete(ops *loader.TestOperation) (*exporter.Operati
 		return opsResult, err
 	}
 
-	resp := ctrl.Client.Delete(context.TODO(), objects)
-	opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+	for ops.Retry > 0 {
+		resp := ctrl.Client.Delete(context.TODO(), objects)
+		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
+		if err == nil {
+			break
+		}
+		logrus.Infof("Retrying operation id: %s, action: %s ...\n", opsId, ops.Action)
 
+		ops.Retry--
+		time.Sleep(2 * time.Second)
+	}
 	return opsResult, err
 }
-
-// func (ctrl *KubeController) delete(ops *loader.TestOperation) *exporter.OperationResult {
-// 	opsResult := &exporter.OperationResult{
-// 		Status:      false,
-// 		Expressions: make([]*exporter.ExpressionResult, 0),
-// 	}
-
-// 	tpl, err := ctrl.Loader.LoadTemplate(ops.Template)
-// 	if err != nil {
-// 		// TODO:
-// 		return opsResult
-// 	}
-// 	raw := new(bytes.Buffer)
-// 	templ := template.Must(template.New("").Parse(tpl.Data))
-// 	err = templ.Execute(raw, ops.TemplateValues)
-// 	if err != nil {
-// 		// TODO:
-// 		return opsResult
-// 	}
-
-// 	objects, err := client.GetUnstructuredFromYAML(raw.String())
-// 	if err != nil {
-// 		// TODO:
-// 		return opsResult
-// 	}
-// 	resp := ctrl.Client.Delete(context.TODO(), objects)
-// 	opsResult.Expressions, opsResult.Status = runAssertions(ops.Assert, resp)
-
-// 	return opsResult
-
-// }
-
-// func (ctrl *KubeController) exec(ops *loader.TestOperation) (string, error) {
-// 	//TODO:
-// 	// run command and get response
-// 	// run assertions
-// 	// return operationResult
-// 	return "", nil
-// }
