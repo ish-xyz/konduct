@@ -30,35 +30,48 @@ type TestCase struct {
 
 	// +kubebuilder:validation:MaxItems=500
 	// +kubebuilder:validation:MinItems=1
-	// +kubebuilder:validation:Required
 	Operations []*TestOperation `yaml:"operations" json:"operations"`
 
-	DefaultTimeout string `yaml:"defaultTimeout" json:"defaultTimeout"`
-	DefaultRetries int    `yaml:"defaultRetries" json:"defaultRetries"`
+	DefaultTimeout string `yaml:"defaultTimeout" json:"defaultTimeout,omitempty"`
+
+	DefaultRetries int `yaml:"defaultRetries" json:"defaultRetries,omitempty"`
 }
 
 type TestOperation struct {
 
-	// Apply/Delete
-	Teardown       bool            `yaml:"teardown" json:"teardown"`
-	Template       string          `yaml:"template" json:"template"`
-	TemplateValues map[string]bool `yaml:"templateValues" json:"teamplateValues"`
+	// Used by apply or delete operations only
+	Teardown bool `yaml:"teardown" json:"teardown,omitempty"`
 
-	// Get
-	ApiVersion    string `yaml:"apiVersion" json:"apiVersion"`
-	Kind          string `yaml:"kind" json:"kind"`
-	Name          string `yaml:"name" json:"name"`
-	Namespace     string `yaml:"namespace" json:"namespace"`
-	LabelSelector string `yaml:"labelSelector" json:"labelSelector"`
+	// Used by apply or delete operations only
+	Template string `yaml:"template" json:"template,omitempty"`
 
-	// Global
+	// Used by apply or delete operations only
+	TemplateValues map[string]bool `yaml:"templateValues" json:"teamplateValues,omitempty"`
+
+	// Used by get operation only
+	ApiVersion string `yaml:"apiVersion" json:"apiVersion,omitempty"`
+
+	// Used by get operation only
+	Kind string `yaml:"kind" json:"kind,omitempty"`
+
+	// Used by get operation only
+	Name string `yaml:"name" json:"name,omitempty"`
+
+	// Used by get operation only
+	Namespace string `yaml:"namespace" json:"namespace,omitempty"`
+
+	// Used by get operation only
+	LabelSelector string `yaml:"labelSelector" json:"labelSelector,omitempty"`
+
 	// +kubebuilder:validation:Required
-	Assert string `yaml:"assert" json:"assert"`
-	// +kubebuilder:validation:Required
-	Action string `yaml:"action" json:"action"`
+	Assert string `yaml:"assert" json:"assert,omitempty"`
 
-	// Global Optional
-	Retry    int `yaml:"retry" json:"retry"`
-	Interval int `yaml:"interval" json:"interval"`
-	Wait     int `yaml:"wait" json:"wait"`
+	// +kubebuilder:validation:Required
+	Action string `yaml:"action" json:"action,omitempty"`
+
+	Retry int `yaml:"retry" json:"retry,omitempty"`
+
+	Interval int `yaml:"interval" json:"interval,omitempty"`
+
+	Wait int `yaml:"wait" json:"wait,omitempty"`
 }

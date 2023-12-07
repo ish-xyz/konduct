@@ -6,6 +6,7 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Cluster
 type TestCase struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

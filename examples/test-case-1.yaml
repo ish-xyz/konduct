@@ -1,4 +1,5 @@
 name: test-case-1
+description: test used as example
 operations:
   # - action: apply
   #   template: template-1

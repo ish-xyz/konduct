@@ -12,7 +12,7 @@ spec:
     listKind: TestCaseList
     plural: testcases
     singular: testcase
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1
     schema:
@@ -46,56 +46,46 @@ spec:
                     action:
                       type: string
                     apiVersion:
-                      description: Get
+                      description: Used by get operation only
                       type: string
                     assert:
-                      description: Global
                       type: string
                     interval:
                       type: integer
                     kind:
+                      description: Used by get operation only
                       type: string
                     labelSelector:
+                      description: Used by get operation only
                       type: string
                     name:
+                      description: Used by get operation only
                       type: string
                     namespace:
+                      description: Used by get operation only
                       type: string
                     retry:
-                      description: Global Optional
                       type: integer
                     teamplateValues:
                       additionalProperties:
                         type: boolean
+                      description: Used by apply or delete operations only
                       type: object
                     teardown:
-                      description: Apply/Delete
+                      description: Used by apply or delete operations only
                       type: boolean
                     template:
+                      description: Used by apply or delete operations only
                       type: string
                     wait:
                       type: integer
                   required:
-                  - action
-                  - apiVersion
-                  - assert
-                  - interval
-                  - kind
-                  - labelSelector
-                  - name
-                  - namespace
-                  - retry
-                  - teamplateValues
-                  - teardown
-                  - template
                   - wait
                   type: object
                 maxItems: 500
                 minItems: 1
                 type: array
             required:
-            - defaultRetries
-            - defaultTimeout
             - description
             - name
             - operations
