@@ -22,9 +22,9 @@ func (ldr *KubeLoader) LoadTestCase(resourceName string) (*TestCase, error) {
 	return testcase, nil
 }
 
-func (ldr *KubeLoader) LoadTemplate(tname string) (*TestTemplate, error) {
+func (ldr *KubeLoader) LoadTemplate(tname string) (*Template, error) {
 
-	var testTempl *TestTemplate
+	var testTempl *Template
 
 	return testTempl, nil
 }

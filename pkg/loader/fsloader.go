@@ -55,9 +55,9 @@ func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 	return testcase, nil
 }
 
-func (ldr *FSloader) LoadTemplate(tname string) (*TestTemplate, error) {
+func (ldr *FSloader) LoadTemplate(tname string) (*Template, error) {
 
-	var testTempl *TestTemplate
+	var testTempl *Template
 
 	tplname := fmt.Sprintf("%s/%s/%s.yaml", ldr.TestsFolder, TEMPLATE_FOLDER, tname)
 

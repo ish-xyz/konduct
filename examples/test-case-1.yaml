@@ -1,24 +1,24 @@
 name: test-case-1
 description: test used as example
 operations:
-  # - action: apply
-  #   template: template-1
-  #   templateValues:
-  #     namespace: default
-  #     name: pod-name
-  #   assert: |
-  #     data.error == "";
-  #     len(data.error) == 0;
-
-  - action: get
-    apiVersion: v1
-    kind: Pod
-    namespace: default
-    name: pod-namesss
-    retry: 10
-    labelSelector: ""
+  - action: apply
+    template: template-1
+    templateValues: ["1"]
+      # namespace: default
+      # name: pod-name
     assert: |
       data.error == "";
+      len(data.error) == 0;
+
+  # - action: get
+  #   apiVersion: v1
+  #   kind: Pod
+  #   namespace: default
+  #   name: pod-namesss
+  #   retry: 10
+  #   labelSelector: ""
+  #   assert: |
+  #     data.error == "";
 
   # - action: delete
   #   template: template-1

@@ -1,0 +1,25 @@
+apiVersion: kubetest.io/v1
+kind: TestCase
+metadata:
+  name: test-case-1
+  labels:
+    app: testcase
+spec:
+  name: test-case-1
+  description: my description
+  retry: 10
+  interval:
+  wait:
+  operations:
+  - action: get
+    apiVersion: v1
+    kind: Pod
+    namespace: default
+    name: pod-namesss
+    retry: 10
+    wait: 10
+    interval: 10
+    labelSelector: ""
+    assert: |
+      data.error == "";
+

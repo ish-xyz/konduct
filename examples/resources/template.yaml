@@ -1,0 +1,15 @@
+apiVersion: kubetest.io/v1
+kind: Template
+metadata:
+  name: namespace
+spec:
+  data: | 
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      labels:
+        {{ range $$key, val := .Values.labels }}
+        {{ $key }}: {{ $value }}
+        {{ end }}
+      name: {{ .Values.name }}
+    spec: {}

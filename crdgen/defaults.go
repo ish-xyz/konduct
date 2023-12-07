@@ -45,5 +45,7 @@ func init() {
 	SchemeBuilder.Register(
 		&TestCase{},
 		&TestCaseList{},
+		&Template{},
+		&TemplateList{},
 	)
 }
