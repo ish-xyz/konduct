@@ -7,18 +7,15 @@ metadata:
 spec:
   name: test-case-1
   description: my description
-  retry: 10
-  interval:
-  wait:
+  retry: 5
+  interval: 1
+  wait: 5
   operations:
   - action: get
     apiVersion: v1
     kind: Pod
     namespace: default
     name: pod-name
-    retry: 10
-    wait: 10
-    interval: 10
     labelSelector: ""
     assert: |
       data.error == "";

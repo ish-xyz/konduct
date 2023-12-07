@@ -4,9 +4,10 @@ Controller to run integration tests on Kubernetes
 **TODO**:
 
 * [x] build command line
-* [...] build loader for CRDs (TestCase and Template)
+* [x] build loader for CRDs (TestCase and Template)
+* [] create validation functions for TestCase and Template types
 * [] build exporter for prometheus (pushgateway)
-* [] improve k8s dynamic client 
+* [x] improve k8s dynamic client 
 * [] implement exec operation
 * [] fix stderr in dynamic client (exec)
 * [x] define CRDs

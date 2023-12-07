@@ -45,6 +45,8 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 
 		for i, op := range testcase.Operations {
 
+			setDefaultTimes(testcase, op)
+
 			opsId := fmt.Sprintf("id-%d", i)
 
 			var opresult = exporter.NewOperationResult()
@@ -76,6 +78,20 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 	}
 
 	return report, nil
+}
+
+func setDefaultTimes(tc *loader.TestCase, op *loader.TestOperation) {
+	if op.Interval == 0 && tc.Interval > 0 {
+		op.Interval = tc.Interval
+	}
+
+	if op.Wait == 0 && tc.Wait > 0 {
+		op.Wait = tc.Wait
+	}
+
+	if op.Retry == 0 && tc.Retry > 0 {
+		op.Retry = tc.Retry
+	}
 }
 
 func (ctrl *KubeController) Run(verbose bool) error {
