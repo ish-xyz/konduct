@@ -1,6 +1,11 @@
 package exporter
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/push"
+)
 
 const (
 	MODE_PUSHGATEWAY = "pushgateway"
@@ -18,33 +23,25 @@ func NewPushgatewayExporter(addr string) (Exporter, error) {
 }
 
 func (e *PushgatewayExporter) Export(rep *Report) error {
-	for _, x := range rep.Results {
-		fmt.Println(x)
+
+	metric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "kubetest_result",
+			Help: "The result of a single e2e test case",
+		},
+		[]string{"name"},
+	)
+
+	for _, testresult := range rep.Results {
+
+		value := float64(0)
+		if testresult.Status {
+			value = 1
+		}
+		metric.WithLabelValues(testresult.Name).Set(value)
 	}
-	return fmt.Errorf("invalid exporter mode selected")
+
+	err := push.New(e.Address, "kubetest").Gatherer(prometheus.DefaultGatherer).Push()
+
+	return err
 }
-
-// import (
-// 	"fmt"
-
-// 	"github.com/prometheus/client_golang/prometheus"
-// 	"github.com/prometheus/client_golang/prometheus/push"
-// )
-
-// func ExamplePusher_Push() {
-// 	completionTime := prometheus.NewGauge(prometheus.GaugeOpts{
-// 		Name: "db_backup_last_completion_timestamp_seconds",
-// 		Help: "The timestamp of the last successful completion of a DB backup.",
-// 	})
-// 	completionTime.SetToCurrentTime()
-// 	if err := push.New("http://pushgateway:9091", "db_backup").
-// 		Collector(completionTime).
-// 		Grouping("db", "customers").
-// 		Push(); err != nil {
-// 		fmt.Println("Could not push completion time to Pushgateway:", err)
-// 	}
-// }
-//
-//
-// kubetest_result{name="test-case", failed=int, succeded=int, source=kubeapi/filesystem}
-// kubetest_status 0/1

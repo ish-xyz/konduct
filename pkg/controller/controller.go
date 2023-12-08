@@ -103,6 +103,7 @@ func setDefaultTimes(tc *loader.TestCase, op *loader.TestOperation) {
 func (ctrl *KubeController) Run(verbose bool) error {
 	// TODO: add loop for controller
 	report, err := ctrl.singleRun(verbose)
+	fmt.Println(err)
 	if err != nil {
 		return err
 	}

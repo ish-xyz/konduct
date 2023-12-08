@@ -29,10 +29,14 @@ func NewFSLoader(testsFolder, templatesFolder string) (Loader, error) {
 }
 
 func (ldr *FSloader) ListTestCases() ([]string, error) {
-	files, err := filepath.Glob(fmt.Sprintf("%s/*.yaml", ldr.TestsFolder))
+
+	_, err := os.Stat(ldr.TestsFolder)
 	if err != nil {
 		return nil, err
 	}
+
+	// No need to check for errors here cause of Glob implementation
+	files, _ := filepath.Glob(fmt.Sprintf("%s/*.yaml", ldr.TestsFolder))
 
 	return files, nil
 }

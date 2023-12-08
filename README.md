@@ -15,5 +15,9 @@ Controller to run integration tests on Kubernetes
 * [] build API to trigger tests on demand
 * [] build JSON exporter
 * [] create front docs and better examples
-* [] Add execution time metric
-* [] Add stats for perf tests
+* [] add execution time metric
+* [] add stats for perf tests
+* [] improve operations logging
+* [] add label selector for "get"
+* [] add operations interval/startupWait
+* [] add parallel tests execution

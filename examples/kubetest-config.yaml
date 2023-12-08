@@ -3,8 +3,8 @@ interval: 4h
 runOnce: true
 debug: true
 source: 
-  type: cluster
-  directory: /xyz
+  type: filesystem
+  directory: ./examples/filesystem
 report:
   type: pushgateway
   address: 127.0.0.1:9091

@@ -1,30 +1,30 @@
 description: test used as example
 operations:
   - action: apply
-    teardown: true/false
     template: template-1
     templateValues:
       namespace: default
       name: pod-name
     assert: |
-      data.error;
+      data.error == "";
 
   - action: exec
     name: pod-name
     namespace: default
-    command: ["wrongcommand"]
+    command: ["ls"]
     assert: |
-      data.error;
+      data.error == "";
 
   - action: get
     apiVersion: v1
     kind: Pod
     namespace: default
-    name: pod-namesss
-    retry: 10
+    name: malicious-pod
+    retry: 3
     labelSelector: ""
     assert: |
-      data.error == "";
+      data.error != "";
+      len(data.objects) == 0;
 
   # - action: delete
   #   template: template-1

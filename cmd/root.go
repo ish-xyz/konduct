@@ -52,8 +52,10 @@ func getRestConfig(kubeconfig string) (*rest.Config, error) {
 	var restConfig *rest.Config
 	// Load kubeconfig
 	if kubeconfig == "" {
+		logrus.Infoln("no kubeconfig defined, running in-cluster mode")
 		restConfig, err = rest.InClusterConfig()
 	} else {
+		logrus.Infoln("loading kubeconfig", kubeconfig)
 		restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 	return restConfig, err
@@ -121,10 +123,6 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	if lviper.GetString("kubeconfig") == "" {
-		logrus.Infoln("no kubeconfig defined, running in-cluster mode")
-	}
-
 	// Init Clients
 	restConfig, err := getRestConfig(expand(lviper.GetString("kubeconfig")))
 	checkError(err)
@@ -135,10 +133,10 @@ func run(cmd *cobra.Command, args []string) {
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
 
 	// Init loader
-	logrus.Infoln("initializing loader")
+	logrus.Infoln("initializing controller...")
 	var ldr loader.Loader
-	sourceType := lviper.GetString("source.type")
 
+	sourceType := lviper.GetString("source.type")
 	if sourceType == SOURCE_CLUSTER {
 		ldr, err = loader.NewKubeLoader(kubeclient)
 	} else if sourceType == SOURCE_FS {
@@ -149,8 +147,8 @@ func run(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	// Init exporter
-	logrus.Infoln("initializing exporter")
 	var exp exporter.Exporter
+
 	exporterType := lviper.GetString("report.type")
 	if exporterType == EXPORTER_PUSHGATEWAY {
 		exp, err = exporter.NewPushgatewayExporter(lviper.GetString("report.address"))
@@ -162,7 +160,6 @@ func run(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	// Init Controller
-	logrus.Infoln("initializing controller")
 	duration, err := time.ParseDuration(lviper.GetString("interval"))
 	if err != nil {
 		duration = time.Duration(time.Hour * 4)
