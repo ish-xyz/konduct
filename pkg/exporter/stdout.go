@@ -13,6 +13,7 @@ func NewStdoutExporter(printall bool) Exporter {
 
 func (e *StdoutExporter) Export(r *Report) error {
 
+	fmt.Printf("\n\n\n")
 	if r.Status {
 		fmt.Printf("tests succeded!\ncompleted tests: %d/%d\n", r.Succeded, r.Failed+r.Succeded)
 	} else {
@@ -30,4 +31,8 @@ func (e *StdoutExporter) Export(r *Report) error {
 	}
 
 	return nil
+}
+
+func (e *StdoutExporter) IsVerbose() bool {
+	return true
 }

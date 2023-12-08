@@ -26,6 +26,16 @@ operations:
       data.error != "";
       len(data.objects) == 0;
 
+  - action: get
+    apiVersion: v1
+    kind: Pod
+    namespace: default
+    name: malicious-pod
+    retry: 3
+    labelSelector: ""
+    assert: |
+      data.error == "";
+
   # - action: delete
   #   template: template-1
   #   templateValues:

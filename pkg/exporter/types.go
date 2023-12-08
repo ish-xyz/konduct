@@ -22,6 +22,7 @@ type OperationResult struct {
 
 type Exporter interface {
 	Export(r *Report) error
+	IsVerbose() bool
 }
 
 type ExpressionResult struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -24,24 +25,33 @@ func NewPushgatewayExporter(addr string) (Exporter, error) {
 
 func (e *PushgatewayExporter) Export(rep *Report) error {
 
-	metric := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "kubetest_result",
-			Help: "The result of a single e2e test case",
-		},
-		[]string{"name"},
-	)
+	logrus.Infoln("exporting results to pushgateway")
+
+	pusher := push.New(e.Address, "kubetest")
 
 	for _, testresult := range rep.Results {
 
-		value := float64(0)
+		metric := prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Name: "kubetest_result",
+				Help: "The result of a single e2e test case",
+				ConstLabels: map[string]string{
+					"name":    testresult.Name,
+					"message": testresult.Message,
+				},
+			},
+		)
 		if testresult.Status {
-			value = 1
+			metric.Set(1)
 		}
-		metric.WithLabelValues(testresult.Name).Set(value)
+		pusher = pusher.Collector(metric)
 	}
 
-	err := push.New(e.Address, "kubetest").Gatherer(prometheus.DefaultGatherer).Push()
+	err := pusher.Push()
 
 	return err
+}
+
+func (e *PushgatewayExporter) IsVerbose() bool {
+	return false
 }
