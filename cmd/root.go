@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -99,13 +101,19 @@ func run(cmd *cobra.Command, args []string) {
 
 	lviper := viper.New()
 
+	logrus.Infoln("loading configuration file on", configFile)
 	lviper.SetConfigFile(configFile)
 	err = lviper.ReadInConfig()
 	checkError(err)
 
-	kcfg := lviper.GetString("kubeconfig")
-	if kcfg == "" {
-		checkError(fmt.Errorf("empty kubeconfig path in config file"))
+	logrus.Infoln("configuration:")
+
+	fmt.Println("GOMAXPROCS:", runtime.GOMAXPROCS(0))
+	yamlData, err := yaml.Marshal(lviper.AllSettings())
+	if err == nil {
+		fmt.Println(string(yamlData))
+	} else {
+		logrus.Errorln("can't print config")
 	}
 
 	// Run in debug mode
@@ -113,8 +121,12 @@ func run(cmd *cobra.Command, args []string) {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
+	if lviper.GetString("kubeconfig") == "" {
+		logrus.Infoln("no kubeconfig defined, running in-cluster mode")
+	}
+
 	// Init Clients
-	restConfig, err := getRestConfig(expand(kcfg))
+	restConfig, err := getRestConfig(expand(lviper.GetString("kubeconfig")))
 	checkError(err)
 
 	clientset, dynclient, err := getClients(restConfig)
@@ -123,6 +135,7 @@ func run(cmd *cobra.Command, args []string) {
 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
 
 	// Init loader
+	logrus.Infoln("initializing loader")
 	var ldr loader.Loader
 	sourceType := lviper.GetString("source.type")
 
@@ -136,6 +149,7 @@ func run(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	// Init exporter
+	logrus.Infoln("initializing exporter")
 	var exp exporter.Exporter
 	exporterType := lviper.GetString("report.type")
 	if exporterType == EXPORTER_PUSHGATEWAY {
@@ -148,6 +162,7 @@ func run(cmd *cobra.Command, args []string) {
 	checkError(err)
 
 	// Init Controller
+	logrus.Infoln("initializing controller")
 	duration, err := time.ParseDuration(lviper.GetString("interval"))
 	if err != nil {
 		duration = time.Duration(time.Hour * 4)

@@ -33,6 +33,8 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 
 	for _, tf := range testfiles {
 
+		logrus.Infoln("loading test case:", tf)
+
 		testResult := exporter.NewTestResult(tf)
 		testcase, err := ctrl.Loader.LoadTestCase(tf)
 		if err != nil {

@@ -79,7 +79,7 @@ func (ctrl *KubeController) get(opsId string, ops *loader.TestOperation) (*expor
 
 	for ops.Retry >= 0 {
 
-		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
+		logrus.Infof("running operation id: %s, action: %s \n", opsId, ops.Action)
 
 		resp := ctrl.Client.Get(context.TODO(), ops.ApiVersion, ops.Kind, ops.Namespace, ops.Name, ops.LabelSelector)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
@@ -121,7 +121,7 @@ func (ctrl *KubeController) apply(opsId string, ops *loader.TestOperation) (*exp
 
 	for ops.Retry >= 0 {
 
-		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
+		logrus.Infof("running operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		resp := ctrl.Client.Apply(context.TODO(), objects)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
@@ -162,7 +162,7 @@ func (ctrl *KubeController) delete(opsId string, ops *loader.TestOperation) (*ex
 
 	for ops.Retry >= 0 {
 
-		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
+		logrus.Infof("running operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		resp := ctrl.Client.Delete(context.TODO(), objects)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
@@ -186,7 +186,7 @@ func (ctrl *KubeController) exec(opsId string, ops *loader.TestOperation) (*expo
 
 	for ops.Retry >= 0 {
 
-		logrus.Infof("Running operation id: %s, action: %s ...\n", opsId, ops.Action)
+		logrus.Infof("running operation id: %s, action: %s ...\n", opsId, ops.Action)
 
 		resp := ctrl.Client.Exec(context.TODO(), ops.Name, ops.Namespace, ops.Command)
 		opsResult.Expressions, err = runAssertions(ops.Assert, resp)
