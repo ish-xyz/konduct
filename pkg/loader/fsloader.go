@@ -14,6 +14,7 @@ const (
 )
 
 func NewFSLoader(testsFolder, templatesFolder string) (Loader, error) {
+
 	if testsFolder == "" {
 		return nil, fmt.Errorf("you must define a source folder for your tests")
 	}

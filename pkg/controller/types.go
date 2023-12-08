@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"time"
+
 	"github.com/ish-xyz/kubetest/pkg/client"
 	"github.com/ish-xyz/kubetest/pkg/exporter"
 	"github.com/ish-xyz/kubetest/pkg/loader"
@@ -15,8 +17,9 @@ type KubeController struct {
 	Loader   loader.Loader
 	Client   client.Client
 	Exporter exporter.Exporter
-	interval int64
+	interval time.Duration
 	logger   *logrus.Entry
+	runOnce  bool
 }
 
 type Payload struct {

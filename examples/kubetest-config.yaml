@@ -1,12 +1,10 @@
 kubeconfig: ~/.kube/config
 interval: 4h
+runOnce: true
 debug: true
-source:
-  cluster: false
-filesystem:
-  directory: ./path
+source: 
+  type: cluster
+  directory: /xyz
 report:
-prometheus:
-  address: 0.0.0.0:9090
-pushgateway:
-  gateway: 0.0.0.0:9091
+  type: pushgateway
+  address: 127.0.0.1:9091

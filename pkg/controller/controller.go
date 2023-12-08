@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ish-xyz/kubetest/pkg/client"
 	"github.com/ish-xyz/kubetest/pkg/exporter"
@@ -9,12 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewController(ldr loader.Loader, cl client.Client, exp exporter.Exporter, intr int64) Controller {
+func NewController(ldr loader.Loader, cl client.Client, exp exporter.Exporter, intrv time.Duration, ro bool) Controller {
 	return &KubeController{
 		Loader:   ldr,
 		Client:   cl,
 		Exporter: exp,
-		interval: intr,
+		interval: intrv,
+		runOnce:  ro,
 		logger:   logrus.New().WithField("name", "kube-controller"),
 	}
 }

@@ -5,9 +5,15 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/ish-xyz/kubetest/pkg/client"
+	"github.com/ish-xyz/kubetest/pkg/controller"
+	"github.com/ish-xyz/kubetest/pkg/exporter"
+	"github.com/ish-xyz/kubetest/pkg/loader"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -15,7 +21,11 @@ import (
 )
 
 const (
-	EXPORTERS_REGEX = "(stdout|pushgateway)"
+	SOURCE_CLUSTER = "cluster"
+	SOURCE_FS      = "filesystem"
+
+	EXPORTER_STDOUT      = "stdout"
+	EXPORTER_PUSHGATEWAY = "pushgateway"
 )
 
 var (
@@ -31,29 +41,12 @@ func Execute() {
 	rootCmd.Execute()
 }
 
-// config:
-
-/*
-  kubeconfig: ~/.kube/config
-  interval: 4h
-  debug: true
-  source:
-    cluster: false
-	filesystem:
-	  directory: ./path
-  report:
-	prometheus:
-	  address: 0.0.0.0:9090
-	pushgateway:
-	  gateway: 0.0.0.0:9091
-*/
-
 func init() {
 	rootCmd.Flags().StringP("config", "c", "", "pass kubetest config file path")
 	rootCmd.MarkFlagRequired("config")
 }
 
-func GetRestConfig(kubeconfig string) (*rest.Config, error) {
+func getRestConfig(kubeconfig string) (*rest.Config, error) {
 	var restConfig *rest.Config
 	// Load kubeconfig
 	if kubeconfig == "" {
@@ -64,7 +57,7 @@ func GetRestConfig(kubeconfig string) (*rest.Config, error) {
 	return restConfig, err
 }
 
-func GetClients(restConfig *rest.Config) (*kubernetes.Clientset, *dynamic.DynamicClient, error) {
+func getClients(restConfig *rest.Config) (*kubernetes.Clientset, *dynamic.DynamicClient, error) {
 	// Allocate clients
 	dc, errx := dynamic.NewForConfig(restConfig)
 
@@ -81,7 +74,7 @@ func GetClients(restConfig *rest.Config) (*kubernetes.Clientset, *dynamic.Dynami
 	return cs, dc, nil
 }
 
-func Expand(path string) string {
+func expand(path string) string {
 	if strings.HasPrefix(path, "~/") {
 		usr, _ := user.Current()
 		dir := usr.HomeDir
@@ -104,56 +97,62 @@ func run(cmd *cobra.Command, args []string) {
 	configFile, err := cmd.Flags().GetString("config")
 	checkError(err)
 
-	fmt.Println(configFile)
+	lviper := viper.New()
+
+	lviper.SetConfigFile(configFile)
+	err = lviper.ReadInConfig()
+	checkError(err)
+
+	kcfg := lviper.GetString("kubeconfig")
+	if kcfg == "" {
+		checkError(fmt.Errorf("empty kubeconfig path in config file"))
+	}
+
+	// Run in debug mode
+	if lviper.GetBool("debug") {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+
+	// Init Clients
+	restConfig, err := getRestConfig(expand(kcfg))
+	checkError(err)
+
+	clientset, dynclient, err := getClients(restConfig)
+	checkError(err)
+
+	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
+
+	// Init loader
+	var ldr loader.Loader
+	sourceType := lviper.GetString("source.type")
+
+	if sourceType == SOURCE_CLUSTER {
+		ldr, err = loader.NewKubeLoader(kubeclient)
+	} else if sourceType == SOURCE_FS {
+		ldr, err = loader.NewFSLoader(lviper.GetString("source.directory"), "")
+	} else {
+		err = fmt.Errorf("invalid source.type in config file")
+	}
+	checkError(err)
+
+	// Init exporter
+	var exp exporter.Exporter
+	exporterType := lviper.GetString("report.type")
+	if exporterType == EXPORTER_PUSHGATEWAY {
+		exp, err = exporter.NewPushgatewayExporter(lviper.GetString("report.address"))
+	} else if exporterType == EXPORTER_STDOUT {
+		exp = exporter.NewStdoutExporter(lviper.GetBool("debug"))
+	} else {
+		err = fmt.Errorf("invalid report.type in config file")
+	}
+	checkError(err)
+
+	// Init Controller
+	duration, err := time.ParseDuration(lviper.GetString("interval"))
+	if err != nil {
+		duration = time.Duration(time.Hour * 4)
+	}
+	ctrl := controller.NewController(ldr, kubeclient, exp, duration, lviper.GetBool("runOnce"))
+
+	checkError(ctrl.Run(lviper.GetBool("debug")))
 }
-
-// 	// Run in debug mode
-// 	if debug {
-// 		logrus.SetLevel(logrus.DebugLevel)
-// 	}
-
-// 	restConfig, err := getRestConfig(expand(kubeconfig))
-// 	checkError(err)
-
-// 	// Init Kube Client
-// 	clientset, dynclient, err := getClients(restConfig)
-// 	checkError(err)
-
-// 	kubeclient := client.NewKubeClient(clientset, dynclient, restConfig)
-
-// 	// Init Tests Loader
-// 	var ldr loader.Loader
-// 	if testsDir != "" {
-// 		// load from filesystem
-// 		ldr, err = loader.NewFSLoader(testsDir, "")
-// 	} else {
-// 		// load from kube api
-// 		ldr, err = loader.NewKubeLoader(kubeclient)
-// 	}
-// 	checkError(err)
-
-// 	// Init Exporter
-// 	exp := getExporter(debug)
-
-// 	// Init Controller
-// 	ctrl := controller.NewController(ldr, kubeclient, exp, interval)
-
-// 	// Execute
-// 	if controllerMode {
-// 		logrus.Fatalln("controller mode is not implemented yet")
-// 	} else {
-// 		err = ctrl.Run(debug)
-// 	}
-
-// 	checkError(err)
-// }
-
-// func getExporter(verbose bool) exporter.Exporter {
-// 	if stdout {
-// 		return exporter.NewStdoutExporter(verbose)
-// 	}
-
-// 	// TODO: validate address
-// 	return exporter.NewPrometheusExporter("pushgateway", pushgateway)
-
-// }

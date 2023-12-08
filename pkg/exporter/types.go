@@ -1,8 +1,7 @@
 package exporter
 
 // Exporters
-type PrometheusExporter struct {
-	Mode    string
+type PushgatewayExporter struct {
 	Address string
 }
 type FileExporter struct {

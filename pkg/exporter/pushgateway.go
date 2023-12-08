@@ -7,28 +7,20 @@ const (
 	MODE_PROMETHEUS  = "prometheus"
 )
 
-func NewPrometheusExporter(mode string, addr string) Exporter {
-	return &PrometheusExporter{
-		Mode: mode,
+func NewPushgatewayExporter(addr string) (Exporter, error) {
+	if addr == "" {
+		return nil, fmt.Errorf("empty mode ")
+	}
+	return &PushgatewayExporter{
 		//Debug:   debug,
 		Address: addr,
-	}
+	}, nil
 }
 
-func (e *PrometheusExporter) Export(r *Report) error {
-	if e.Mode == MODE_PUSHGATEWAY {
-		return e.exportPGW(r)
-	}
-
-	return fmt.Errorf("invalid exporter mode selected")
-}
-
-func (e *PrometheusExporter) exportPGW(rep *Report) error {
-
+func (e *PushgatewayExporter) Export(rep *Report) error {
 	for _, x := range rep.Results {
 		fmt.Println(x)
 	}
-
 	return fmt.Errorf("invalid exporter mode selected")
 }
 
