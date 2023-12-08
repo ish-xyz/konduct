@@ -1,0 +1,12 @@
+kubeconfig: ~/.kube/config
+interval: 4h
+debug: true
+source:
+  cluster: false
+filesystem:
+  directory: ./path
+report:
+prometheus:
+  address: 0.0.0.0:9090
+pushgateway:
+  gateway: 0.0.0.0:9091
