@@ -15,21 +15,21 @@ type KubeLoader struct {
 
 type Loader interface {
 	ListTestCases() ([]string, error)
-	LoadTestCase(string) (*TestCase, error)
-	LoadTemplate(string) (*Template, error)
+	LoadTestCase(string) (*TestCaseSpec, error)
+	LoadTemplate(string) (*TemplateSpec, error)
 }
 
 // TODO: add Validate() method to structs: Template and TestCase
 
 // Template definition used to by apply/delete methods
-type Template struct {
+type TemplateSpec struct {
 	Name string `yaml:"name" json:"name,omitempty"`
 	// +kubebuilder:validation:Required
 	Data string `yaml:"data" json:"data"`
 }
 
 // TestCase definition used to run e2e tests
-type TestCase struct {
+type TestCaseSpec struct {
 
 	// +kubebuilder:validation:Required
 	Description string `yaml:"description" json:"description"`
@@ -61,6 +61,7 @@ type TestOperation struct {
 
 	// +kubebuilder:validation:Required
 	Assert string `yaml:"assert" json:"assert,omitempty"`
+
 	// +kubebuilder:validation:Required
 	Action   string `yaml:"action" json:"action,omitempty"`
 	Retry    int    `yaml:"retry" json:"retry,omitempty"`

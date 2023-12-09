@@ -10,8 +10,8 @@ import (
 type Template struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              loader.Template `json:"spec,omitempty"`
-	Status            TemplateStatus  `json:"status,omitempty"`
+	Spec              loader.TemplateSpec `json:"spec,omitempty"`
+	Status            TemplateStatus      `json:"status,omitempty"`
 }
 
 type TemplateStatus struct {

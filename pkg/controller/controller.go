@@ -87,7 +87,7 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 	return report, nil
 }
 
-func setDefaultTimes(tc *loader.TestCase, op *loader.TestOperation) {
+func setDefaultTimes(tc *loader.TestCaseSpec, op *loader.TestOperation) {
 	if op.Interval == 0 && tc.Interval > 0 {
 		op.Interval = tc.Interval
 	}

@@ -41,11 +41,9 @@ func (ldr *FSloader) ListTestCases() ([]string, error) {
 	return files, nil
 }
 
-// TODO join the following 2 functions with generics
+func (ldr *FSloader) LoadTestCase(fname string) (*TestCaseSpec, error) {
 
-func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
-
-	var testcase *TestCase
+	var testcase *TestCaseSpec
 
 	data, err := os.ReadFile(fname)
 	if err != nil {
@@ -60,9 +58,9 @@ func (ldr *FSloader) LoadTestCase(fname string) (*TestCase, error) {
 	return testcase, nil
 }
 
-func (ldr *FSloader) LoadTemplate(tname string) (*Template, error) {
+func (ldr *FSloader) LoadTemplate(tname string) (*TemplateSpec, error) {
 
-	var testTempl *Template
+	var testTempl *TemplateSpec
 
 	tplname := fmt.Sprintf("%s/%s/%s.yaml", ldr.TestsFolder, TEMPLATE_FOLDER, tname)
 

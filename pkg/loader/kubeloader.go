@@ -21,6 +21,7 @@ func (ldr *KubeLoader) ListTestCases() ([]string, error) {
 	if resp.Error != "" {
 		return nil, fmt.Errorf("%v", resp.Error)
 	}
+
 	for _, c := range resp.Objects {
 		tcases = append(tcases, c["metadata"].(map[string]interface{})["name"].(string))
 	}
@@ -28,11 +29,9 @@ func (ldr *KubeLoader) ListTestCases() ([]string, error) {
 	return tcases, nil
 }
 
-// TODO join the following 2 functions with generics
+func (ldr *KubeLoader) LoadTestCase(resourceName string) (*TestCaseSpec, error) {
 
-func (ldr *KubeLoader) LoadTestCase(resourceName string) (*TestCase, error) {
-
-	var testcase *TestCase
+	var testcase *TestCaseSpec
 
 	resp := ldr.Client.Get(context.TODO(), "kubetest.io/v1", "testcase", "", resourceName, "")
 	if resp.Error != "" {
@@ -48,8 +47,8 @@ func (ldr *KubeLoader) LoadTestCase(resourceName string) (*TestCase, error) {
 	return testcase, err
 }
 
-func (ldr *KubeLoader) LoadTemplate(resourceName string) (*Template, error) {
-	var templ *Template
+func (ldr *KubeLoader) LoadTemplate(resourceName string) (*TemplateSpec, error) {
+	var templ *TemplateSpec
 
 	resp := ldr.Client.Get(context.TODO(), "kubetest.io/v1", "template", "", resourceName, "")
 	if resp.Error != "" {

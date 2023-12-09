@@ -10,8 +10,8 @@ import (
 type TestCase struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              loader.TestCase `json:"spec,omitempty"`
-	Status            TestCaseStatus  `json:"status,omitempty"`
+	Spec              loader.TestCaseSpec `json:"spec,omitempty"`
+	Status            TestCaseStatus      `json:"status,omitempty"`
 }
 
 type TestCaseStatus struct {
