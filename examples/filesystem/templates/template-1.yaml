@@ -1,4 +1,3 @@
-name: teamplate-1
 data: |
   apiVersion: v1
   kind: Pod

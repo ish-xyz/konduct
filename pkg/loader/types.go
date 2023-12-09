@@ -23,7 +23,6 @@ type Loader interface {
 
 // Template definition used to by apply/delete methods
 type TemplateSpec struct {
-	Name string `yaml:"name" json:"name,omitempty"`
 	// +kubebuilder:validation:Required
 	Data string `yaml:"data" json:"data"`
 }
@@ -46,25 +45,22 @@ type TestCaseSpec struct {
 type TestOperation struct {
 	Teardown bool   `yaml:"teardown" json:"teardown,omitempty"`
 	Template string `yaml:"template" json:"template,omitempty"`
-
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	TemplateValues map[string]interface{} `yaml:"templateValues" json:"templateValues,omitempty"`
 
-	ApiVersion    string `yaml:"apiVersion" json:"apiVersion,omitempty"`
-	Kind          string `yaml:"kind" json:"kind,omitempty"`
-	LabelSelector string `yaml:"labelSelector" json:"labelSelector,omitempty"`
-
-	Name      string   `yaml:"name" json:"name,omitempty"`
-	Namespace string   `yaml:"namespace" json:"namespace,omitempty"`
-	Command   []string `yaml:"command" json:"command,omitempty"`
-
-	// +kubebuilder:validation:Required
-	Assert string `yaml:"assert" json:"assert,omitempty"`
+	ApiVersion    string   `yaml:"apiVersion" json:"apiVersion,omitempty"`
+	Kind          string   `yaml:"kind" json:"kind,omitempty"`
+	LabelSelector string   `yaml:"labelSelector" json:"labelSelector,omitempty"`
+	Name          string   `yaml:"name" json:"name,omitempty"`
+	Namespace     string   `yaml:"namespace" json:"namespace,omitempty"`
+	Command       []string `yaml:"command" json:"command,omitempty"`
 
 	// +kubebuilder:validation:Required
 	Action   string `yaml:"action" json:"action,omitempty"`
 	Retry    int    `yaml:"retry" json:"retry,omitempty"`
 	Interval int    `yaml:"interval" json:"interval,omitempty"`
 	Wait     int    `yaml:"wait" json:"wait,omitempty"`
+	// +kubebuilder:validation:Required
+	Assert string `yaml:"assert" json:"assert,omitempty"`
 }

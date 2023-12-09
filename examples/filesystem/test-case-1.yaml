@@ -35,15 +35,3 @@ operations:
     labelSelector: ""
     assert: |
       data.error == "";
-
-  # - action: delete
-  #   template: template-1
-  #   templateValues:
-  #     namespace: default
-  #     name: pod-name
-  #   assert: |
-  #     data.error == "";
-  #     len(data.error) == 0;
-  # len(data.objects) == 1;
-  # data.objects[0]["metadata"]["name"] == "pod-name";
-  # data.error == "";
