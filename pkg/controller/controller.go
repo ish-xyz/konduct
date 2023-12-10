@@ -103,11 +103,23 @@ func setDefaultTimes(tc *loader.TestCaseSpec, op *loader.TestOperation) {
 
 func (ctrl *KubeController) Run(verbose bool) error {
 	// TODO: add loop for controller
-	report, err := ctrl.singleRun(verbose)
-	if err != nil {
-		return err
+	for {
+		report, err := ctrl.singleRun(verbose)
+		if err != nil {
+			return err
+		}
+
+		err = ctrl.Exporter.Export(report)
+		if err != nil {
+			logrus.Errorln("failed to produce report, error:", err)
+		}
+
+		if ctrl.runOnce {
+			break
+		}
+
+		time.Sleep(time.Second * ctrl.interval)
 	}
 
-	ctrl.Exporter.Export(report)
-	return err
+	return nil
 }
