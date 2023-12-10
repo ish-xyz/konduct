@@ -32,10 +32,9 @@ type ExpressionResult struct {
 
 // TestResult functions
 type TestResult struct {
-	FilePath string
-	Name     string
-	Status   bool
-	Message  string
+	Name    string
+	Status  bool
+	Message string
 }
 
 // Report functions

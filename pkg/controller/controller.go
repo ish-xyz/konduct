@@ -45,7 +45,7 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 			continue
 		}
 
-		testResult.Name = tf
+		// TODO: validate testcase
 
 		for i, op := range testcase.Operations {
 
@@ -55,13 +55,13 @@ func (ctrl *KubeController) singleRun(verbose bool) (*exporter.Report, error) {
 
 			var opresult = exporter.NewOperationResult()
 
-			if op.Action == GET_ACTION {
+			if op.Action == loader.GET_ACTION {
 				opresult, err = ctrl.get(opsId, op)
-			} else if op.Action == APPLY_ACTION {
+			} else if op.Action == loader.APPLY_ACTION {
 				opresult, err = ctrl.apply(opsId, op)
-			} else if op.Action == DELETE_ACTION {
+			} else if op.Action == loader.DELETE_ACTION {
 				opresult, err = ctrl.delete(opsId, op)
-			} else if op.Action == EXEC_ACTION {
+			} else if op.Action == loader.EXEC_ACTION {
 				opresult, err = ctrl.exec(opsId, op)
 			} else {
 				err = fmt.Errorf("unkown action '%s'", op.Action)

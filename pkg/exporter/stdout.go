@@ -23,7 +23,7 @@ func (e *StdoutExporter) Export(r *Report) error {
 	fmt.Println("results:")
 
 	for _, res := range r.Results {
-		fmt.Println(">>", res.FilePath)
+		fmt.Println(">>", res.Name)
 		if !res.Status || e.PrintAll {
 			fmt.Printf("	%s\n", strings.TrimSpace(res.Message))
 		}

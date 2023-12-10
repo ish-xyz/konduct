@@ -15,14 +15,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	// actions
-	APPLY_ACTION  = "apply"
-	DELETE_ACTION = "delete"
-	EXEC_ACTION   = "exec"
-	GET_ACTION    = "get"
-)
-
 func runAssertions(code string, resp *client.Response) ([]*exporter.ExpressionResult, error) {
 
 	env := map[string]interface{}{
@@ -68,7 +60,15 @@ func runAssertions(code string, resp *client.Response) ([]*exporter.ExpressionRe
 	return expressionResults, nil
 }
 
+func initialWait(ops *loader.TestOperation) {
+	logrus.Infof("waiting %ds to start operation '%s'", ops.Wait, ops.Action)
+	time.Sleep(time.Second * time.Duration(ops.Wait))
+	return
+}
+
 func (ctrl *KubeController) get(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
+
+	initialWait(ops)
 
 	var err error
 
@@ -88,13 +88,15 @@ func (ctrl *KubeController) get(opsId string, ops *loader.TestOperation) (*expor
 		}
 
 		ops.Retry--
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(ops.Interval) * time.Second)
 	}
 
 	return opsResult, err
 }
 
 func (ctrl *KubeController) apply(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
+
+	initialWait(ops)
 
 	eexp := &exporter.ExpressionResult{Expression: ">> test operation setup"}
 	opsResult := &exporter.OperationResult{
@@ -130,12 +132,14 @@ func (ctrl *KubeController) apply(opsId string, ops *loader.TestOperation) (*exp
 		}
 
 		ops.Retry--
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(ops.Interval) * time.Second)
 	}
 	return opsResult, err
 }
 
 func (ctrl *KubeController) delete(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
+
+	initialWait(ops)
 
 	eexp := &exporter.ExpressionResult{Expression: ">> test operation setup"}
 	opsResult := &exporter.OperationResult{
@@ -171,12 +175,15 @@ func (ctrl *KubeController) delete(opsId string, ops *loader.TestOperation) (*ex
 		}
 
 		ops.Retry--
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(ops.Interval) * time.Second)
 	}
 	return opsResult, err
 }
 
 func (ctrl *KubeController) exec(opsId string, ops *loader.TestOperation) (*exporter.OperationResult, error) {
+
+	initialWait(ops)
+
 	var err error
 
 	opsResult := &exporter.OperationResult{
@@ -195,7 +202,7 @@ func (ctrl *KubeController) exec(opsId string, ops *loader.TestOperation) (*expo
 		}
 
 		ops.Retry--
-		time.Sleep(2 * time.Second)
+		time.Sleep(time.Duration(ops.Interval) * time.Second)
 	}
 
 	return opsResult, err

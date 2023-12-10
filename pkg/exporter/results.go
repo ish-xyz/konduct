@@ -6,10 +6,9 @@ import (
 
 func NewTestResult(tf string) *TestResult {
 	return &TestResult{
-		FilePath: tf,
-		Name:     "",
-		Status:   true,
-		Message:  "",
+		Name:    tf,
+		Status:  true,
+		Message: "",
 	}
 }
 

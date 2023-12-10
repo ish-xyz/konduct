@@ -5,9 +5,10 @@ import (
 )
 
 const (
-	GET_ACTION   = "get"
-	APPLY_ACTION = "apply"
-	EXEC_ACTION  = "exec"
+	GET_ACTION    = "get"
+	APPLY_ACTION  = "apply"
+	EXEC_ACTION   = "exec"
+	DELETE_ACTION = "delete"
 )
 
 func (tc *TestCaseSpec) Validate() error {
@@ -33,7 +34,12 @@ func validateOps(ops []*TestOperation) error {
 				return err
 			}
 		} else if op.Action == APPLY_ACTION {
-			err := validApply(op)
+			err := validApplyDelete(op)
+			if err != nil {
+				return err
+			}
+		} else if op.Action == DELETE_ACTION {
+			err := validApplyDelete(op)
 			if err != nil {
 				return err
 			}
@@ -58,7 +64,7 @@ func validGet(op *TestOperation) error {
 	return nil
 }
 
-func validApply(op *TestOperation) error {
+func validApplyDelete(op *TestOperation) error {
 	if op.Template == "" {
 		return fmt.Errorf("no template defined")
 	}

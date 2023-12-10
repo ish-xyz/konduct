@@ -35,8 +35,8 @@ Here's a series of examples:
 * [...] create front docs and better examples
 * [...] create validation functions for TestCase, Operations and Template types
 * [...] improve operations logging
-* [...] add label selector for "get"
-* [...] add operations interval/startupWait
+* [x] add label selector for "get"
+* [x] add operations interval/startupWait
 * [x] build command line
 * [x] build loader for CRDs (TestCase and Template)
 * [x] build exporter for prometheus (pushgateway)
