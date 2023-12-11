@@ -1,7 +1,7 @@
 package loader
 
 import (
-	"github.com/ish-xyz/kubetest/pkg/client"
+	"github.com/ish-xyz/konduct/pkg/client"
 )
 
 type FSloader struct {

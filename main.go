@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ish-xyz/kubetest/cmd"
+	"github.com/ish-xyz/konduct/cmd"
 )
 
 //go:generate go run sigs.k8s.io/controller-tools/cmd/controller-gen crd object:headerFile="hack/boilerplate.go.txt" paths="./crdgen/..."

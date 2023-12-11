@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ish-xyz/kubetest/pkg/client"
+	"github.com/ish-xyz/konduct/pkg/client"
 	"github.com/mitchellh/mapstructure"
 )
 

@@ -1,4 +1,4 @@
-module github.com/ish-xyz/kubetest
+module github.com/ish-xyz/konduct
 
 go 1.19
 

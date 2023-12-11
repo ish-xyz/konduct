@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ish-xyz/kubetest/pkg/client"
-	"github.com/ish-xyz/kubetest/pkg/exporter"
-	"github.com/ish-xyz/kubetest/pkg/loader"
+	"github.com/ish-xyz/konduct/pkg/client"
+	"github.com/ish-xyz/konduct/pkg/exporter"
+	"github.com/ish-xyz/konduct/pkg/loader"
 	"github.com/sirupsen/logrus"
 )
 
