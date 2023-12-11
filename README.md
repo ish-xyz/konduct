@@ -1,6 +1,9 @@
 **KONDUCT**
 
-When running multiple and complex Kubernetes-based infrastructures you may want to test that everything is working fine at all times - Monitoring solutions (such as Prometheus) provide a lot of functionalities to do that.
+When running multiple and complex Kubernetes-based infrastructures you may want to test that everything is working fine at all times.
+
+Monitoring solutions (such as Prometheus) provide a lot of functionalities to do that.
+
 However, you may want to run some more complex tests or have a complete suite of acceptance tests before delivering Kubernetes-based platform to your customers.
 
 **If that's the case** Konduct is designed exacly for you.
